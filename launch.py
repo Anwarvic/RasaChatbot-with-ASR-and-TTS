@@ -19,8 +19,11 @@ def call_chatbot():
 	# send message to Rasa 
 	msg = flask.request.data.decode('utf-8')
 	rasa_data = flask.json.dumps({"sender": "Rasa", "message": msg})
-	res = requests.post("http://localhost:5005/webhooks/rest/webhook", rasa_data)
-	res = res.json()
+	# some requests just get lost, loop till you get a response
+	while(True):
+		res = requests.post("http://localhost:5005/webhooks/rest/webhook", rasa_data)
+		res = res.json()
+		if res: break
 	print(res)
 	flask_response = app.response_class(response=flask.json.dumps(res),
 										status=200,

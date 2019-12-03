@@ -10,21 +10,25 @@ app.controller('MainController', ['$scope', '$http',
 		    	"sender": "user",
 		    	"message": "Hello World",
 				"time": "2019-12-02",
+				"type": "text"
 	    	},
 			{
 				"sender": "bot",
 				"message": "Hello World from bot",
-				"time": "2019-12-02"
+				"time": "2019-12-02",
+				"type": "text"
 			},
 			{
 		    	"sender": "user",
 		    	"message": "Hello World2",
-		    	"time": "2019-12-02"
+		    	"time": "2019-12-02",
+				"type": "text"
 	    	},
 			{
 				"sender": "bot",
 				"message": "Hello World2 from bot",
-				"time": "2019-12-02"
+				"time": "2019-12-02",
+				"type": "text"
 		}];
 
 		// function to get the current time
@@ -59,8 +63,15 @@ app.controller('MainController', ['$scope', '$http',
 					console.log(response);
 			        response['data'].forEach(element => {
 						var msg = { "sender": "bot",
-									"message": element['text'],
 									"time": $scope.get_time()};
+						if (element["text"]){
+							msg["message"] = element["text"];
+							msg["type"] = "text";
+						}
+						else if (element["image"]){
+							msg["message"] = element["image"];
+							msg["type"] = "img";
+						}
 						$scope.conversation.push(msg);
 					});
 			    },

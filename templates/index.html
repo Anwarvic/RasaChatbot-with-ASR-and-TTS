@@ -51,15 +51,21 @@
 						</div>
 					</div>
 
-					<div class="d-flex justify-content-start mb-4"  ng-if=" msg.sender== 'bot' ">
+					<div class="d-flex justify-content-start mb-4" ng-if=" msg.sender== 'bot' ">
 						<div class="img_cont_msg">
 							<img src="{{ url_for('static', filename='img/bot.png') }}" class="rounded-circle user_img_msg">
 						</div>
 						<div class="msg_cotainer">
-							{a msg.message a}
+							<div ng-if=" msg.type== 'text' ">
+								{a msg.message a}
+							</div>
+							<div >
+								<img ng-if=" msg.type== 'img' " src="https://i.imgur.com/nGF1K8f.jpg" style="width: 400px;">
+							</div>
 							<span class="msg_time">{a msg.time a}</span>
 						</div>
 					</div>
+
 				</div>
 			</div>
 			<div class="card-footer">

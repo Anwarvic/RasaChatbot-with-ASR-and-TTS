@@ -1,21 +1,26 @@
 import os
-from flask import Flask, render_template
+import flask
 
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 
 
 
 @app.route('/')
 def index():
-	return render_template("index.html")
+	return flask.render_template("index.html")
 
 
 
-# @app.route('/static/<path:path>')
-# def send_static_files(path):
-# 	print('path is: ',path)
-# 	return send_from_directory('/static', path)
+@app.route('/send_message', methods=['POST'])
+def call_chatbot():
+	print(flask.request.data)
+	print('\n\n\n')
+	return flask.jsonify(success=True)
+
+	# return redirect(url_for('elastic_query', query_text=text))
+
+
 
 # @app.route('/', methods=['POST'])
 # def my_form_post():
@@ -33,10 +38,6 @@ def index():
 # 	return res
 
 
-# @app.route('/query/<query_text>', methods=['POST'])
-# def result_form_post(query_text):
-# 	text = request.form['search_query']
-# 	return redirect(url_for('elastic_query', query_text=text))
 
 
 # @app.route('/movie/<id_>')
@@ -54,4 +55,4 @@ def index():
 
 
 if __name__ == '__main__':
-	app.run(debug = True)
+	app.run(debug = True, port=5000)

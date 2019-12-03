@@ -46,13 +46,21 @@ app.controller('MainController', ['$scope', '$http',
 				$scope.conversation.push(msg);
 				// clear input
 				$scope.user_msg = "";
-				// scroll down to the bottom
+				// scroll down to the bottom of conversation
 				setTimeout(function(){
 					document.querySelector(".msg_card_body")
 						.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
 				}, 50);
 				// call rasa API
-				// $http.post(url, data, config);
+			    $http.post('/send_message', JSON.stringify(msg))
+			    .then(function(response) {
+			        // success
+			        console.log(response);
+			    },
+			    function(response) { 
+		            // failed
+		            console.log(response);
+			    });
 			}
 		}
 	}

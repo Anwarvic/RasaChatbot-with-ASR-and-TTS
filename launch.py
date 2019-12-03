@@ -1,5 +1,6 @@
 import os
 import flask
+import json
 
 
 app = flask.Flask(__name__)
@@ -14,7 +15,8 @@ def index():
 
 @app.route('/send_message', methods=['POST'])
 def call_chatbot():
-	print(flask.request.data)
+	msg = json.loads(flask.request.data.decode('utf-8'))
+	print(msg)
 	print('\n\n\n')
 	return flask.jsonify(success=True)
 

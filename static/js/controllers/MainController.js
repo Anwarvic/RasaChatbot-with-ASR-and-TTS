@@ -42,8 +42,9 @@ app.controller('MainController', ['$scope', '$http',
 				msg = { "type": "user",
 						"message": $scope.user_msg,
 						"time": $scope.get_time()};
-				$scope.total_messages += 1;
 				$scope.conversation.push(msg);
+				// increase number of total messages
+				$scope.total_messages += 1;
 				// clear input
 				$scope.user_msg = "";
 				// scroll down to the bottom of conversation
@@ -51,7 +52,7 @@ app.controller('MainController', ['$scope', '$http',
 					document.querySelector(".msg_card_body")
 						.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
 				}, 50);
-				// call rasa API
+				// call flask back-end
 			    $http.post('/send_message', JSON.stringify(msg))
 			    .then(function(response) {
 			        // success

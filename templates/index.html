@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Chat</title>
+		<!-- load jquery -->
+		<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+		<!-- load Angular.js -->
+		<script src="{{ url_for('static', filename='js/shared/angular.min.js') }}"></script>
+		<!-- load bootstrap -->
+		<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+		<!-- load font-awesome -->
+		<link href="{{ url_for('static', filename='fontawesome/css/all.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+		<!-- <link href="{{ url_for('static', filename='malihu-custom-scrollbar-plugin/css/jquery.mCustomScrollbar.min.css') }}" rel="stylesheet"> -->
+	</head>
+	<body ng-app="Application">
+		<div class="card col-md-12 col-xl-12 chat h-100" ng-controller="MainController">
+			<div class="msg_head">
+				<div class="d-flex bd-highlight">
+					<div class="img_cont">
+						<img src="{{ url_for('static', filename='img/user.png') }}" class="rounded-circle user_img">
+						<span class="online_icon"></span>
+					</div>
+					<div class="user_info">
+						<span>Chat with User</span>
+						<p>{a total_messages a} Messages</p>
+					</div>
+				</div>
+				<span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+				<div class="action_menu">
+					<ul>
+						<li><i class="fas fa-user-circle"></i> View profile</li>
+						<li><i class="fas fa-users"></i> Add to close friends</li>
+						<li><i class="fas fa-plus"></i> Add to group</li>
+						<li><i class="fas fa-ban"></i> Block</li>
+					</ul>
+				</div>
+			</div>
+			<div class="card-body msg_card_body">
+				<div ng-repeat="msg in conversation">
+					<div class="d-flex justify-content-end mb-4" ng-if=" msg.type== 'user' ">
+						<div class="msg_cotainer_send">
+							{a msg.message a}
+							<span class="msg_time_send">{a msg.time a}</span>
+						</div>
+						<div class="img_cont_msg">
+							<img src="{{ url_for('static', filename='img/user.png') }}" class="rounded-circle user_img_msg">
+						</div>
+					</div>
+
+					<div class="d-flex justify-content-start mb-4"  ng-if=" msg.type== 'bot' ">
+						<div class="img_cont_msg">
+							<img src="{{ url_for('static', filename='img/bot.png') }}" class="rounded-circle user_img_msg">
+						</div>
+						<div class="msg_cotainer">
+							{a msg.message a}
+							<span class="msg_time">{a msg.time a}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card-footer">
+				<div class="input-group">
+					<form ng-submit="send_message()" class="form-control type_msg">
+						<input class="form-control" style="height:100%" placeholder="Type your message..." ng-model="user_msg">
+					</form>
+					<div class="input-group-append">
+						<a class="input-group-text send_btn send_btn2">
+							<i class="fas fa-microphone-alt"></i>
+						</a>
+						<a class="input-group-text send_btn send_btn1" ng-click="send_message()">
+							<i class="fas fa-location-arrow"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+        <!-- <script src="{{ url_for('static', filename='malihu-custom-scrollbar-plugin/js/jquery.mCustomScrollbar.min.js') }}"></script> -->
+        <!-- <script src="/static/malihu-custom-scrollbar-plugin/js/jquery.mCustomScrollbar.min.js"></script> -->
+        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+        <!-- Modules -->
+        <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+        <!-- Controllers -->
+        <script src="{{ url_for('static', filename='js/controllers/MainController.js') }}"></script>
+	</body>
+</html>
+

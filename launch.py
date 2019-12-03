@@ -1,6 +1,7 @@
 import os
 import flask
-import json
+import requests
+
 
 
 app = flask.Flask(__name__)
@@ -15,12 +16,16 @@ def index():
 
 @app.route('/send_message', methods=['POST'])
 def call_chatbot():
-	msg = json.loads(flask.request.data.decode('utf-8'))
-	print(msg)
-	print('\n\n\n')
-	return flask.jsonify(success=True)
-
-	# return redirect(url_for('elastic_query', query_text=text))
+	# send message to Rasa 
+	msg = flask.request.data.decode('utf-8')
+	rasa_data = flask.json.dumps({"sender": "Rasa", "message": msg})
+	res = requests.post("http://localhost:5005/webhooks/rest/webhook", rasa_data)
+	res = res.json()
+	print(res)
+	flask_response = app.response_class(response=flask.json.dumps(res),
+										status=200,
+										mimetype='application/json' )
+	return flask_response
 
 
 
@@ -57,4 +62,5 @@ def call_chatbot():
 
 
 if __name__ == '__main__':
+	
 	app.run(debug = True, port=5000)

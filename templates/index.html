@@ -2,6 +2,8 @@
 <html>
 	<head>
 		<title>Chat</title>
+		<!-- solves favicon.ico not found error -->
+		<link rel="shortcut icon" href="#">
 		<!-- load jquery -->
 		<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 		<!-- load Angular.js -->
@@ -10,8 +12,8 @@
 		<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
 		<!-- load font-awesome -->
 		<link href="{{ url_for('static', filename='fontawesome/css/all.css') }}" rel="stylesheet">
+		<!-- load my css -->
         <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-		<!-- <link href="{{ url_for('static', filename='malihu-custom-scrollbar-plugin/css/jquery.mCustomScrollbar.min.css') }}" rel="stylesheet"> -->
 	</head>
 	<body ng-app="Application">
 		<div class="card col-md-12 col-xl-12 chat h-100" ng-controller="MainController">
@@ -38,7 +40,8 @@
 			</div>
 			<div class="card-body msg_card_body">
 				<div ng-repeat="msg in conversation">
-					<div class="d-flex justify-content-end mb-4" ng-if=" msg.type== 'user' ">
+					
+					<div class="d-flex justify-content-end mb-4" ng-if=" msg.sender== 'user' ">
 						<div class="msg_cotainer_send">
 							{a msg.message a}
 							<span class="msg_time_send">{a msg.time a}</span>
@@ -48,7 +51,7 @@
 						</div>
 					</div>
 
-					<div class="d-flex justify-content-start mb-4"  ng-if=" msg.type== 'bot' ">
+					<div class="d-flex justify-content-start mb-4"  ng-if=" msg.sender== 'bot' ">
 						<div class="img_cont_msg">
 							<img src="{{ url_for('static', filename='img/bot.png') }}" class="rounded-circle user_img_msg">
 						</div>
@@ -77,13 +80,12 @@
 		</div>
         <!-- Placed at the end of the document so the pages load faster -->
         <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
-        <!-- <script src="{{ url_for('static', filename='malihu-custom-scrollbar-plugin/js/jquery.mCustomScrollbar.min.js') }}"></script> -->
-        <!-- <script src="/static/malihu-custom-scrollbar-plugin/js/jquery.mCustomScrollbar.min.js"></script> -->
-        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-        <!-- Modules -->
+        <!-- Angularjs Modules -->
         <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-        <!-- Controllers -->
+        <!-- Angularjs Controllers -->
         <script src="{{ url_for('static', filename='js/controllers/MainController.js') }}"></script>
+		<!-- my scripts -->
+		<script src="{{ url_for('static', filename='js/script.js') }}"></script>
 	</body>
 </html>
 

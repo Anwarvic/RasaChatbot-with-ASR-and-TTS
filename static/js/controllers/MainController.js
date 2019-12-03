@@ -7,22 +7,22 @@ app.controller('MainController', ['$scope', '$http',
 
 		// basic datatype for the session conversation
 	    $scope.conversation = [{
-		    	"type": "user",
+		    	"sender": "user",
 		    	"message": "Hello World",
-		    	"time": "2019-12-02"
+				"time": "2019-12-02",
 	    	},
 			{
-				"type": "bot",
+				"sender": "bot",
 				"message": "Hello World from bot",
 				"time": "2019-12-02"
 			},
 			{
-		    	"type": "user",
+		    	"sender": "user",
 		    	"message": "Hello World2",
 		    	"time": "2019-12-02"
 	    	},
 			{
-				"type": "bot",
+				"sender": "bot",
 				"message": "Hello World2 from bot",
 				"time": "2019-12-02"
 		}];
@@ -39,9 +39,9 @@ app.controller('MainController', ['$scope', '$http',
 	    // function to send user messages to the bot
 		$scope.send_message = function(){
 			if ($scope.user_msg){
-				msg = { "type": "user",
-						"message": $scope.user_msg,
-						"time": $scope.get_time()};
+				var msg = { "sender": "user",
+							"message": $scope.user_msg,
+							"time": $scope.get_time()};
 				$scope.conversation.push(msg);
 				// increase number of total messages
 				$scope.total_messages += 1;
@@ -53,10 +53,16 @@ app.controller('MainController', ['$scope', '$http',
 						.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
 				}, 50);
 				// call flask back-end
-			    $http.post('/send_message', JSON.stringify(msg))
+			    $http.post('/send_message', msg['message'])
 			    .then(function(response) {
-			        // success
-			        console.log(response);
+					// success
+					console.log(response);
+			        response['data'].forEach(element => {
+						var msg = { "sender": "bot",
+									"message": element['text'],
+									"time": $scope.get_time()};
+						$scope.conversation.push(msg);
+					});
 			    },
 			    function(response) { 
 		            // failed

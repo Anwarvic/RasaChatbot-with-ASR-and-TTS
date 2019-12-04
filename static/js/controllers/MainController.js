@@ -93,6 +93,7 @@ app.controller('MainController', ['$scope', '$http',
 							msg["type"] = "img";
 						}
 						$scope.conversation.push(msg);
+						$scope.total_messages += 1 ;
 					});
 			    },
 			    function(response) { 

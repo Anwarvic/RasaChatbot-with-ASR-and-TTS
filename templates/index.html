@@ -32,16 +32,18 @@
 				<div class="action_menu">
 					<ul>
 						<li>
-							<i class="fas fa-assistive-listening-systems"></i> Enable ASR
+							<i class="fas fa-assistive-listening-systems"></i>
+							<span>Enable ASR</span>
 							<label class="switch">
-								<input type="checkbox">
+								<input type="checkbox" ng-model="config.asr">
 								<span class="slider round"></span>
 							</label>
 						</li>
 						<li>
-							<i class="fas fa-bullhorn"></i> Enable TTS
+							<i class="fas fa-bullhorn"></i>
+							<span>Enable TTS</span>
 							<label class="switch">
-								<input type="checkbox">
+								<input type="checkbox" ng-model="config.tts">
 								<span class="slider round"></span>
 							</label>
 						</li>
@@ -69,8 +71,8 @@
 							<div ng-if=" msg.type== 'text' ">
 								{a msg.message a}
 							</div>
-							<div >
-								<img ng-if=" msg.type== 'img' " src="{a msg.message a}" style="width: 400px;">
+							<div ng-if=" msg.type== 'img' ">
+								<img src="{a msg.message a}" style="width: 400px;">
 							</div>
 							<span class="msg_time">{a msg.time a}</span>
 						</div>
@@ -84,7 +86,7 @@
 						<input class="form-control" style="height:100%" placeholder="Type your message..." ng-model="user_msg">
 					</form>
 					<div class="input-group-append">
-						<button class="input-group-text send_btn send_btn2" title="Hold to record, release to send">
+						<button class="input-group-text send_btn send_btn2" ng-disabled="!config.asr" title="Hold to record, release to send">
 							<i class="fas fa-microphone-alt"></i>
 						</button>
 						<button class="input-group-text send_btn send_btn1" ng-click="send_message()">

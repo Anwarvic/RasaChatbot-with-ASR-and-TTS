@@ -64,7 +64,13 @@ a{
 	cursor: pointer;
 }
 
-.send_btn2{
+.send_btn2:disabled{
+	background-color: rgba(0,0,0,0.3) !important;
+	border:0 !important;
+	color: #808080 !important;
+}
+
+.send_btn2:enabled{
 	background-color: rgba(0,0,0,0.3) !important;
 	border:0 !important;
 	color: white !important;

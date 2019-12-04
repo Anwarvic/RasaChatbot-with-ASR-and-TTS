@@ -2,9 +2,15 @@
 
 app.controller('MainController', ['$scope', '$http',
 	function($scope, $http) {
+		// toggle the ellipsis menu
 		$scope.show_menu = function(){
 			angular.element('.action_menu').toggle();
 		};
+
+		// un-toggle the ellipsis menu
+		$scope.untoggle = function(){
+			angular.element('.action_menu').hide();
+		}
 		// total number of messages between user and bot
 		$scope.total_messages = 0
 

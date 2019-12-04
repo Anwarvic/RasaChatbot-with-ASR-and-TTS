@@ -204,7 +204,6 @@ a{
 	background-color: rgba(0,0,0,0.2);
 }
 
-
 /* For toggle switches */
 .switch {
 	position: relative;
@@ -244,11 +243,7 @@ a{
 input:checked + .slider {
 	background-color: #4c4b7f;
 }
-  
-input:focus + .slider {
-	box-shadow: 0 0 1px #4c4b7f;
-}
-  
+
 input:checked + .slider:before {
 	right: 4px;
 	-webkit-transform: translateX(26px);

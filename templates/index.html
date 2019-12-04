@@ -28,7 +28,7 @@
 						<p>{a total_messages a} Messages</p>
 					</div>
 				</div>
-				<span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+				<a id="action_menu_btn" ng-click="show_menu()"><i class="fas fa-ellipsis-v"></i></a>
 				<div class="action_menu">
 					<ul>
 						<li>
@@ -100,8 +100,6 @@
         <script src="{{ url_for('static', filename='js/app.js') }}"></script>
         <!-- Angularjs Controllers -->
         <script src="{{ url_for('static', filename='js/controllers/MainController.js') }}"></script>
-		<!-- my scripts -->
-		<script src="{{ url_for('static', filename='js/script.js') }}"></script>
 	</body>
 </html>
 

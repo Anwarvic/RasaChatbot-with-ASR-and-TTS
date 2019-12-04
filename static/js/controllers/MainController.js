@@ -2,6 +2,9 @@
 
 app.controller('MainController', ['$scope', '$http',
 	function($scope, $http) {
+		$scope.show_menu = function(){
+			angular.element('.action_menu').toggle();
+		};
 		// total number of messages between user and bot
 		$scope.total_messages = 0
 

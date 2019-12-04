@@ -2,6 +2,13 @@
 
 app.controller('MainController', ['$scope', '$http',
 	function($scope, $http) {
+		//////////////////// HTML click functions ////////////////////
+		// control app configulration
+		$scope.config = {
+			asr: true,
+			tts: true
+		};
+
 		// toggle the ellipsis menu
 		$scope.show_menu = function(){
 			angular.element('.action_menu').toggle();
@@ -11,6 +18,7 @@ app.controller('MainController', ['$scope', '$http',
 		$scope.untoggle = function(){
 			angular.element('.action_menu').hide();
 		}
+		//////////////////// Variables ////////////////////
 		// total number of messages between user and bot
 		$scope.total_messages = 0
 
@@ -40,6 +48,7 @@ app.controller('MainController', ['$scope', '$http',
 				"type": "text"
 		}];
 
+		//////////////////// helper functions ////////////////////
 		// function to get the current time
 		$scope.get_time= function(){
 			var today = new Date();
@@ -49,6 +58,7 @@ app.controller('MainController', ['$scope', '$http',
 			return time;
 		}
 
+		//////////////////// Main functions ////////////////////
 	    // function to send user messages to the bot
 		$scope.send_message = function(){
 			if ($scope.user_msg){
@@ -70,6 +80,7 @@ app.controller('MainController', ['$scope', '$http',
 			    .then(function(response) {
 					// success
 					console.log(response);
+					// Push the bot response
 			        response['data'].forEach(element => {
 						var msg = { "sender": "bot",
 									"time": $scope.get_time()};

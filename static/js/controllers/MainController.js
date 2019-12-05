@@ -103,7 +103,6 @@ app.controller('MainController', ['$scope', '$http',
 				return new Promise(async resolve => {
 					stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 					$scope.recorder = new MediaRecorder(stream)
-					console.log("ENABLED");
 				  });
 			}
 		}
@@ -112,24 +111,24 @@ app.controller('MainController', ['$scope', '$http',
 		$scope.holdCounter = 0;
 		$scope.startRecording = function(){
 			return new Promise(async resolve => {
-				chunks = []
-				$scope.recorder.ondataavailable = e => chunks.push(e.data)
-				$scope.recorder.start()
+				chunks = [];
+				$scope.recorder.ondataavailable = e => chunks.push(e.data);
+				$scope.recorder.start();
 				console.log("START RECORDING");
 				$scope.recorder.onstop = async ()=>{
-				  let blob = new Blob(chunks, {'type':'audio/ogg; codecs=opus'})
+				  let blob = new Blob(chunks, {'type':'audio/ogg; codecs=opus'});
 				  let encodedBlob = await $scope.b2text(blob);
 				  // message
 				  var msg = {
-					  			"id": $scope.messageId++,
-								"sender": "user",
-								"time": $scope.getTime(),
-								"body": {
-									"snd": encodedBlob,
-									"text":"blah blah blah",
-									"showPlayButton": true
-									},
-								"type": "audio"
+							"id": $scope.messageId++,
+							"sender": "user",
+							"time": $scope.getTime(),
+							"body": {
+								"snd": encodedBlob,
+								"text":"blah blah blah",
+								"showPlayButton": true
+								},
+							"type": "audio"
 					};
 				  $scope.conversation.push(msg);
 				  $scope.$apply();

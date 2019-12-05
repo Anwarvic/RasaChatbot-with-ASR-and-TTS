@@ -10,7 +10,7 @@ app.controller('MainController', ['$scope', '$http',
 		};
 
 		// toggle the ellipsis menu
-		$scope.show_menu = function(){
+		$scope.showMenu = function(){
 			angular.element('.action_menu').toggle();
 		};
 
@@ -20,7 +20,7 @@ app.controller('MainController', ['$scope', '$http',
 		}
 		//////////////////// Variables ////////////////////
 		// total number of messages between user and bot
-		$scope.total_messages = 0
+		$scope.totalMessages = 0
 
 		// basic datatype for the session conversation
 	    $scope.conversation = [{
@@ -50,7 +50,7 @@ app.controller('MainController', ['$scope', '$http',
 
 		//////////////////// helper functions ////////////////////
 		// function to get the current time
-		$scope.get_time= function(){
+		$scope.getTime= function(){
 			var today = new Date();
 			// var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
 			var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
@@ -60,16 +60,16 @@ app.controller('MainController', ['$scope', '$http',
 
 		//////////////////// Main functions ////////////////////
 	    // function to send user messages to the bot
-		$scope.send_message = function(){
-			if ($scope.user_msg){
+		$scope.sendMessage = function(){
+			if ($scope.userMsg){
 				var msg = { "sender": "user",
-							"message": $scope.user_msg,
-							"time": $scope.get_time()};
+							"message": $scope.userMsg,
+							"time": $scope.getTime()};
 				$scope.conversation.push(msg);
 				// increase number of total messages
-				$scope.total_messages += 1;
+				$scope.totalMessages += 1;
 				// clear input
-				$scope.user_msg = "";
+				$scope.userMsg = "";
 				// scroll down to the bottom of conversation
 				setTimeout(function(){
 					document.querySelector(".msg_card_body")
@@ -83,7 +83,7 @@ app.controller('MainController', ['$scope', '$http',
 					// Push the bot response
 			        response['data'].forEach(element => {
 						var msg = { "sender": "bot",
-									"time": $scope.get_time()};
+									"time": $scope.getTime()};
 						if (element["text"]){
 							msg["message"] = element["text"];
 							msg["type"] = "text";
@@ -93,7 +93,7 @@ app.controller('MainController', ['$scope', '$http',
 							msg["type"] = "img";
 						}
 						$scope.conversation.push(msg);
-						$scope.total_messages += 1 ;
+						$scope.totalMessages  += 1 ;
 					});
 			    },
 			    function(response) { 

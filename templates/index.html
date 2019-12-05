@@ -28,7 +28,7 @@
 						<p>{a total_messages a} Messages</p>
 					</div>
 				</div>
-				<a id="action_menu_btn" ng-click="show_menu()"><i class="fas fa-ellipsis-v"></i></a>
+				<a id="action_menu_btn" ng-click="showMenu()"><i class="fas fa-ellipsis-v"></i></a>
 				<div class="action_menu">
 					<ul>
 						<li>
@@ -82,14 +82,14 @@
 			</div>
 			<div class="card-footer">
 				<div class="input-group">
-					<form ng-submit="send_message()" class="form-control type_msg">
-						<input class="form-control" style="height:100%" placeholder="Type your message..." ng-model="user_msg">
+					<form ng-submit="sendMessage()" class="form-control type_msg">
+						<input class="form-control" style="height:100%" placeholder="Type your message..." ng-model="userMsg">
 					</form>
 					<div class="input-group-append">
 						<button class="input-group-text send_btn send_btn2" ng-disabled="!config.asr" title="Hold to record, release to send" ng-mousedown="record()" ng-mouseup="stop()">
 							<i class="fas fa-microphone-alt"></i>
 						</button>
-						<button class="input-group-text send_btn send_btn1" ng-click="send_message()">
+						<button class="input-group-text send_btn send_btn1" ng-click="sendMessage()">
 							<i class="fas fa-location-arrow"></i>
 						</button>
 					</div>

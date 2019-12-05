@@ -86,7 +86,7 @@
 						<input class="form-control" style="height:100%" placeholder="Type your message..." ng-model="user_msg">
 					</form>
 					<div class="input-group-append">
-						<button class="input-group-text send_btn send_btn2" ng-disabled="!config.asr" title="Hold to record, release to send">
+						<button class="input-group-text send_btn send_btn2" ng-disabled="!config.asr" title="Hold to record, release to send" ng-mousedown="record()" ng-mouseup="stop()">
 							<i class="fas fa-microphone-alt"></i>
 						</button>
 						<button class="input-group-text send_btn send_btn1" ng-click="send_message()">

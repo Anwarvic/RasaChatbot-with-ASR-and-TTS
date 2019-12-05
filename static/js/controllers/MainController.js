@@ -102,5 +102,25 @@ app.controller('MainController', ['$scope', '$http',
 			    });
 			}
 		}
+		// record function for the ASR
+		$scope.holdCounter = 0;
+		$scope.startRecording = function(){
+			console.log("Recording...");
+		}
+
+		// stop recording function for the ASR
+		$scope.stop = function(){
+			if ($scope.holdCounter){
+				console.log("Recording stopped!!");
+				clearTimeout($scope.holdCounter);
+			}
+		}
+
+		$scope.record = function(){
+			console.log("record btn is clicked");
+			$scope.stop();
+			//hold for 2s to start recording
+			$scope.holdCounter = setTimeout(function(){ $scope.startRecording(); }, 2000);
+		}
 	}
 ]);

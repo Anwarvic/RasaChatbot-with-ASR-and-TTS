@@ -5,8 +5,8 @@ app.controller('MainController', ['$scope', '$http',
 		//////////////////// HTML click functions ////////////////////
 		// control app configulration
 		$scope.config = {
-			asr: true,
-			tts: true
+			asr: false,
+			tts: false
 		};
 
 		// toggle the ellipsis menu
@@ -82,6 +82,18 @@ app.controller('MainController', ['$scope', '$http',
 			    });
 			}
 		}
+		// get browser mic permission
+		$scope.haveMicPermission = false;
+		$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
+
+		$scope.getMicPermission = function(){
+			$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
+			if ($scope.config.asr && !$scope.haveMicPermission){
+				$scope.haveMicPermission = true;
+				console.log("just once");
+			}
+		}
+
 		// record function for the ASR
 		$scope.holdCounter = 0;
 		$scope.startRecording = function(){

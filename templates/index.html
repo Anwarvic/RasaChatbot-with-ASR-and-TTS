@@ -25,7 +25,7 @@
 					</div>
 					<div class="user_info">
 						<span>Chat with User</span>
-						<p>{a total_messages a} Messages</p>
+						<p>{a totalMessages a} Messages</p>
 					</div>
 				</div>
 				<a id="action_menu_btn" ng-click="showMenu()"><i class="fas fa-ellipsis-v"></i></a>
@@ -55,7 +55,12 @@
 					
 					<div class="d-flex justify-content-end mb-4" ng-if=" msg.sender== 'user' ">
 						<div class="msg_cotainer_send">
-							{a msg.body a}
+							<div ng-if=" msg.type== 'text' ">
+								<span>{a msg.body a}</span>
+							</div>
+							<div ng-if=" msg.type== 'audio' ">
+								<a ng-click="play( msg.id)"><i ng-if="msg.body.showPlayButton" class="far fa-play-circle fa-lg"></i></a><span>{a msg.body.text a}</span>
+							</div>
 							<span class="msg_time_send">{a msg.time a}</span>
 						</div>
 						<div class="img_cont_msg">
@@ -69,7 +74,7 @@
 						</div>
 						<div class="msg_cotainer">
 							<div ng-if=" msg.type== 'text' ">
-								{a msg.body a}
+								<span>{a msg.body a}</span>
 							</div>
 							<div ng-if=" msg.type== 'img' ">
 								<img src="{a msg.body a}" style="width: 400px;">

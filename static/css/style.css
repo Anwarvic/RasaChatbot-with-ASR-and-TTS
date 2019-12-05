@@ -147,6 +147,13 @@ a{
 	position: relative;
 }
 
+.msg_cotainer_send a{
+	color: white !important;
+	cursor: pointer;
+	padding-right: 10px;
+	margin: 5px;
+}
+
 .msg_time{
 	position: absolute;
 	left: 0;

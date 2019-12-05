@@ -36,14 +36,24 @@ app.controller('MainController', ['$scope', '$http',
 			return time;
 		}
 
+		// covert blob bytes to URL text
+		$scope.b2text = blob => new Promise(resolve => {
+			const reader = new FileReader();
+			reader.onloadend = e => resolve(e.srcElement.result);
+			reader.readAsDataURL(blob);
+		});
+
 		//////////////////// Main functions ////////////////////
 	    // function to send user messages to the bot
 		$scope.sendMessage = function(){
 			if ($scope.userMsg){
-				var msg = { "id": $scope.messageId++,
+				var msg = {
+							"id": $scope.messageId++,
 							"sender": "user",
 							"body": $scope.userMsg,
-							"time": $scope.getTime()};
+							"time": $scope.getTime(),
+							"type": "text"
+				};
 				$scope.conversation.push(msg);
 				// increase number of total messages
 				$scope.totalMessages += 1;
@@ -90,14 +100,42 @@ app.controller('MainController', ['$scope', '$http',
 			$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
 			if ($scope.config.asr && !$scope.haveMicPermission){
 				$scope.haveMicPermission = true;
-				console.log("just once");
+				return new Promise(async resolve => {
+					stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+					$scope.recorder = new MediaRecorder(stream)
+					console.log("ENABLED");
+				  });
 			}
 		}
-
+		
 		// record function for the ASR
 		$scope.holdCounter = 0;
 		$scope.startRecording = function(){
-			console.log("Recording...");
+			return new Promise(async resolve => {
+				chunks = []
+				$scope.recorder.ondataavailable = e => chunks.push(e.data)
+				$scope.recorder.start()
+				console.log("START RECORDING");
+				$scope.recorder.onstop = async ()=>{
+				  let blob = new Blob(chunks, {'type':'audio/ogg; codecs=opus'})
+				  let encodedBlob = await $scope.b2text(blob);
+				  // message
+				  var msg = {
+					  			"id": $scope.messageId++,
+								"sender": "user",
+								"time": $scope.getTime(),
+								"body": {
+									"snd": encodedBlob,
+									"text":"blah blah blah",
+									"showPlayButton": true
+									},
+								"type": "audio"
+					};
+				  $scope.conversation.push(msg);
+				  $scope.$apply();
+				  resolve(encodedBlob);
+				}
+			});
 		}
 
 		// stop recording function for the ASR
@@ -105,14 +143,33 @@ app.controller('MainController', ['$scope', '$http',
 			if ($scope.holdCounter){
 				console.log("Recording stopped!!");
 				clearTimeout($scope.holdCounter);
+				if ($scope.recorder && $scope.recorder.state == "recording"){
+					$scope.recorder.stop();
+					console.log("STOPPED");
+				}
 			}
 		}
 
 		$scope.record = function(){
 			console.log("record btn is clicked");
 			$scope.stop();
-			//hold for 2s to start recording
-			$scope.holdCounter = setTimeout(function(){ $scope.startRecording(); }, 2000);
+			//hold for 1s to start recording
+			$scope.holdCounter = setTimeout(function(){
+				let snd = new Audio("/static/audio/trigger.wav");
+				snd.play();
+				$scope.startRecording();
+			}, 1000);
+		}
+
+		// play audio file
+		$scope.play = function(id){
+			$scope.conversation[id].body.showPlayButton = false;
+			let snd = new Audio($scope.conversation[id].body.snd);
+			snd.play();
+			snd.onended = function() {
+				$scope.conversation[id].body.showPlayButton = true;
+				$scope.$apply();
+			};
 		}
 	}
 ]);

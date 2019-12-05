@@ -55,7 +55,7 @@
 					
 					<div class="d-flex justify-content-end mb-4" ng-if=" msg.sender== 'user' ">
 						<div class="msg_cotainer_send">
-							{a msg.message a}
+							{a msg.body a}
 							<span class="msg_time_send">{a msg.time a}</span>
 						</div>
 						<div class="img_cont_msg">
@@ -69,10 +69,10 @@
 						</div>
 						<div class="msg_cotainer">
 							<div ng-if=" msg.type== 'text' ">
-								{a msg.message a}
+								{a msg.body a}
 							</div>
 							<div ng-if=" msg.type== 'img' ">
-								<img src="{a msg.message a}" style="width: 400px;">
+								<img src="{a msg.body a}" style="width: 400px;">
 							</div>
 							<span class="msg_time">{a msg.time a}</span>
 						</div>

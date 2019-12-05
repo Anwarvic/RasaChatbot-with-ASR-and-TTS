@@ -20,33 +20,11 @@ app.controller('MainController', ['$scope', '$http',
 		}
 		//////////////////// Variables ////////////////////
 		// total number of messages between user and bot
-		$scope.totalMessages = 0
+		$scope.totalMessages = 0;
+		$scope.messageId = 0;
 
 		// basic datatype for the session conversation
-	    $scope.conversation = [{
-		    	"sender": "user",
-		    	"message": "Hello World",
-				"time": "2019-12-02",
-				"type": "text"
-	    	},
-			{
-				"sender": "bot",
-				"message": "Hello World from bot",
-				"time": "2019-12-02",
-				"type": "text"
-			},
-			{
-		    	"sender": "user",
-		    	"message": "Hello World2",
-		    	"time": "2019-12-02",
-				"type": "text"
-	    	},
-			{
-				"sender": "bot",
-				"message": "Hello World2 from bot",
-				"time": "2019-12-02",
-				"type": "text"
-		}];
+	    $scope.conversation = [];
 
 		//////////////////// helper functions ////////////////////
 		// function to get the current time
@@ -62,8 +40,9 @@ app.controller('MainController', ['$scope', '$http',
 	    // function to send user messages to the bot
 		$scope.sendMessage = function(){
 			if ($scope.userMsg){
-				var msg = { "sender": "user",
-							"message": $scope.userMsg,
+				var msg = { "id": $scope.messageId++,
+							"sender": "user",
+							"body": $scope.userMsg,
 							"time": $scope.getTime()};
 				$scope.conversation.push(msg);
 				// increase number of total messages
@@ -82,14 +61,15 @@ app.controller('MainController', ['$scope', '$http',
 					console.log(response);
 					// Push the bot response
 			        response['data'].forEach(element => {
-						var msg = { "sender": "bot",
+						var msg = { "id": $scope.messageId++,
+									"sender": "bot",
 									"time": $scope.getTime()};
 						if (element["text"]){
-							msg["message"] = element["text"];
+							msg["body"] = element["text"];
 							msg["type"] = "text";
 						}
 						else if (element["image"]){
-							msg["message"] = element["image"];
+							msg["body"] = element["image"];
 							msg["type"] = "img";
 						}
 						$scope.conversation.push(msg);

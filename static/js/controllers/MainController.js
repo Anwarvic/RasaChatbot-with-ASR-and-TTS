@@ -93,13 +93,14 @@ app.controller('MainController', ['$scope', '$http',
 			}
 		}
 		// get browser mic permission
-		$scope.haveMicPermission = false;
+		$scope.haveMicPermission = true;
 		$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
 
 		$scope.getMicPermission = function(){
 			$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
 			if ($scope.config.asr && !$scope.haveMicPermission){
 				$scope.haveMicPermission = true;
+				console.log("Getting Permission");
 				return new Promise(async resolve => {
 					stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 					$scope.recorder = new MediaRecorder(stream)
@@ -165,8 +166,10 @@ app.controller('MainController', ['$scope', '$http',
 			$scope.conversation[id].body.showPlayButton = false;
 			let snd = new Audio($scope.conversation[id].body.snd);
 			snd.play();
+			document.getElementById("message#"+id).getElementsByClassName("far").style.display = "hidden";
 			snd.onended = function() {
 				$scope.conversation[id].body.showPlayButton = true;
+				document.getElementById("message#"+id).getElementsByClassName("far").removeAttribute('style');
 				$scope.$apply();
 			};
 		}

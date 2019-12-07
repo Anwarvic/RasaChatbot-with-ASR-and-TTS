@@ -1,4 +1,5 @@
 import os
+from time import time
 import flask
 import requests
 
@@ -21,8 +22,14 @@ def call_chatbot():
 	rasa_data = flask.json.dumps({"sender": "Rasa", "message": msg})
 	# some requests get lost, loop till you get a response
 	while(True):
-		res = requests.post("http://localhost:5005/webhooks/rest/webhook", rasa_data)
-		res = res.json()
+		try:
+			res = requests.post(url="http://localhost:5005/webhooks/rest/webhook",
+								data=rasa_data,
+								timeout=5)
+			res = res.json()
+		except:
+			res = [{'recipient_id': 'Rasa',
+					'text': "[Something went wrong, we didn't get any response]"}]
 		if res: break
 	print(res)
 	flask_response = app.response_class(response=flask.json.dumps(res),

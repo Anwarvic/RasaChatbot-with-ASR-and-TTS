@@ -93,7 +93,7 @@ app.controller('MainController', ['$scope', '$http',
 			}
 		}
 		// get browser mic permission
-		$scope.haveMicPermission = true;
+		$scope.haveMicPermission = false;
 		$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
 
 		$scope.getMicPermission = function(){
@@ -127,7 +127,6 @@ app.controller('MainController', ['$scope', '$http',
 							"body": {
 								"snd": encodedBlob,
 								"text":"blah blah blah",
-								"showPlayButton": true
 								},
 							"type": "audio"
 					};
@@ -163,14 +162,11 @@ app.controller('MainController', ['$scope', '$http',
 
 		// play audio file
 		$scope.play = function(id){
-			$scope.conversation[id].body.showPlayButton = false;
 			let snd = new Audio($scope.conversation[id].body.snd);
 			snd.play();
-			document.getElementById("message#"+id).getElementsByClassName("far").style.display = "hidden";
+			document.getElementById("play-icon#"+id).style.display = "none";
 			snd.onended = function() {
-				$scope.conversation[id].body.showPlayButton = true;
-				document.getElementById("message#"+id).getElementsByClassName("far").removeAttribute('style');
-				$scope.$apply();
+				document.getElementById("play-icon#"+id).removeAttribute('style');
 			};
 		}
 	}

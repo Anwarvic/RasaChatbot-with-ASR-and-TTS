@@ -61,7 +61,7 @@
 								<span>{a msg.body a}</span>
 							</div>
 							<div ng-if=" msg.type== 'audio' ">
-								<a ng-click="play( msg.id)"><i ng-if="msg.body.showPlayButton" class="far fa-play-circle fa-lg"></i></a><span>{a msg.body.text a}</span>
+								<a ng-click="play( msg.id)"><i id="play-icon#{a msg.id a}" class="far fa-play-circle fa-lg"></i></a><span>{a msg.body.text a}</span>
 							</div>
 							<span class="msg_time_send">{a msg.time a}</span>
 						</div>

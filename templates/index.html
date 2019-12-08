@@ -55,8 +55,8 @@
 			<div class="card-body msg_card_body" ng-click="untoggle()">
 				<div ng-repeat="msg in conversation">
 					
-					<div id="msg#{a msg.id a}" class="d-flex justify-content-end mb-4" ng-if=" msg.sender== 'user' ">
-						<div class="msg_cotainer_send">
+					<div class="d-flex justify-content-end mb-4" ng-if=" msg.sender== 'user' ">
+						<div id="msg#{a msg.id a}" class="msg_cotainer_send">
 							<div ng-if=" msg.type== 'text' ">
 								<span>{a msg.body a}</span>
 							</div>
@@ -70,11 +70,11 @@
 						</div>
 					</div>
 
-					<div id="msg#{a msg.id a}" class="d-flex justify-content-start mb-4" ng-if=" msg.sender== 'bot' ">
+					<div class="d-flex justify-content-start mb-4" ng-if=" msg.sender== 'bot' ">
 						<div class="img_cont_msg">
 							<img src="{{ url_for('static', filename='img/bot.png') }}" class="rounded-circle user_img_msg">
 						</div>
-						<div class="msg_cotainer">
+						<div id="msg#{a msg.id a}" class="msg_cotainer">
 							<div ng-if=" msg.type== 'text' ">
 								<span>{a msg.body a}</span>
 							</div>

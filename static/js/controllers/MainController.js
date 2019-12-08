@@ -116,17 +116,20 @@ app.controller('MainController', ['$scope', '$http',
 				$scope.recorder.ondataavailable = e => chunks.push(e.data);
 				$scope.recorder.start();
 				console.log("START RECORDING");
+				let audioStart = Date.now();
 				$scope.recorder.onstop = async ()=>{
-				  let blob = new Blob(chunks, {'type':'audio/ogg; codecs=opus'});
-				  let encodedBlob = await $scope.b2text(blob);
-				  // message
-				  var msg = {
+					let audioEnd = Date.now();
+					let blob = new Blob(chunks, {'type':'audio/ogg; codecs=opus'});
+					let encodedBlob = await $scope.b2text(blob);
+				  	// message
+				  	var msg = {
 							"id": $scope.messageId++,
 							"sender": "user",
 							"time": $scope.getTime(),
 							"body": {
 								"snd": encodedBlob,
 								"text":"blah blah blah",
+								"duration": (audioEnd-audioStart)/1000
 								},
 							"type": "audio"
 					};
@@ -164,9 +167,18 @@ app.controller('MainController', ['$scope', '$http',
 		$scope.play = function(id){
 			let snd = new Audio($scope.conversation[id].body.snd);
 			snd.play();
+			// hide play-icon when playing audio (TODO: change this to pause)
 			document.getElementById("play-icon#"+id).style.display = "none";
+			let audioDuration = $scope.conversation[id].body.duration;
+			console.log(audioDuration);
+			// shadow-transition effect
+			document.getElementById("msg#"+id).setAttribute("style",
+				"background-position: left bottom; transition: "+audioDuration+"s linear");
 			snd.onended = function() {
+				// get back the play-icon
 				document.getElementById("play-icon#"+id).removeAttribute('style');
+				// remove the shadow-transition effect
+				document.getElementById("msg#"+id).removeAttribute('style');
 			};
 		}
 	}

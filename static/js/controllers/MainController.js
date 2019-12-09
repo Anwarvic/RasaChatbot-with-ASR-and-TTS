@@ -114,22 +114,31 @@ app.controller('MainController', ['$scope', '$http',
 					let audioEnd = Date.now();
 					let blob = new Blob(chunks, {'type':'audio/ogg; codecs=opus'});
 					let encodedBlob = await $scope.b2text(blob);
-				  	// message
-				  	var msg = {
+					// send post request to flask backend
+					$http.post('/send_audio_msg', encodedBlob)
+					.then(function(response) {
+						// success
+						console.log(response["data"]["text"]);
+						// message
+						var msg = {
 							"id": $scope.conversation.length,
 							"sender": "user",
 							"time": $scope.getTime(),
 							"body": {
 								"snd": encodedBlob,
-								"text":"blah blah blah",
+								"text":response["data"]["text"],
 								"duration": (audioEnd-audioStart)/1000
-								},
-							"type": "audio"
-					};
-				  $scope.conversation.push(msg);
-				  $scope.$apply();
-				  resolve(encodedBlob);
+							},
+							"type": "audio"};
+						$scope.conversation.push(msg);
+						// $scope.$apply();
+					},
+					function(response) { 
+						// failed
+						console.log(response);
+					});
 				}
+				// resolve(encodedBlob);
 			});
 		}
 

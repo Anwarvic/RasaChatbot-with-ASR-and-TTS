@@ -19,9 +19,6 @@ app.controller('MainController', ['$scope', '$http',
 			angular.element('.action_menu').hide();
 		}
 		//////////////////// Variables ////////////////////
-		// total number of messages between user and bot
-		$scope.messageId = 0;
-
 		// basic datatype for the session conversation
 	    $scope.conversation = [];
 
@@ -47,7 +44,7 @@ app.controller('MainController', ['$scope', '$http',
 		$scope.sendMessage = function(){
 			if ($scope.userMsg){
 				var msg = {
-							"id": $scope.messageId++,
+							"id": $scope.conversation.length,
 							"sender": "user",
 							"body": $scope.userMsg,
 							"time": $scope.getTime(),
@@ -68,7 +65,7 @@ app.controller('MainController', ['$scope', '$http',
 					console.log(response);
 					// Push the bot response
 			        response['data'].forEach(element => {
-						var msg = { "id": $scope.messageId++,
+						var msg = { "id": $scope.conversation.length,
 									"sender": "bot",
 									"time": $scope.getTime()};
 						if (element["text"]){
@@ -119,7 +116,7 @@ app.controller('MainController', ['$scope', '$http',
 					let encodedBlob = await $scope.b2text(blob);
 				  	// message
 				  	var msg = {
-							"id": $scope.messageId++,
+							"id": $scope.conversation.length,
 							"sender": "user",
 							"time": $scope.getTime(),
 							"body": {

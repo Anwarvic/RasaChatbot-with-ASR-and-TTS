@@ -20,7 +20,6 @@ app.controller('MainController', ['$scope', '$http',
 		}
 		//////////////////// Variables ////////////////////
 		// total number of messages between user and bot
-		$scope.totalMessages = 0;
 		$scope.messageId = 0;
 
 		// basic datatype for the session conversation
@@ -55,8 +54,6 @@ app.controller('MainController', ['$scope', '$http',
 							"type": "text"
 				};
 				$scope.conversation.push(msg);
-				// increase number of total messages
-				$scope.totalMessages += 1;
 				// clear input
 				$scope.userMsg = "";
 				// scroll down to the bottom of conversation
@@ -83,7 +80,6 @@ app.controller('MainController', ['$scope', '$http',
 							msg["type"] = "img";
 						}
 						$scope.conversation.push(msg);
-						$scope.totalMessages  += 1 ;
 					});
 			    },
 			    function(response) { 

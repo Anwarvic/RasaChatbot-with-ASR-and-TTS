@@ -1,0 +1,3 @@
+wget
+librosa
+python-Levenshtein

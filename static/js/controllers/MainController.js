@@ -105,10 +105,10 @@ app.controller('MainController', ['$scope', '$http',
 		$scope.holdCounter = 0;
 		$scope.startRecording = function(){
 			return new Promise(async resolve => {
-				chunks = [];
-				$scope.recorder.ondataavailable = e => chunks.push(e.data);
 				$scope.recorder.start();
 				console.log("START RECORDING");
+				let chunks = [];
+				$scope.recorder.ondataavailable = e => chunks.push(e.data);
 				let audioStart = Date.now();
 				$scope.recorder.onstop = async ()=>{
 					let audioEnd = Date.now();
@@ -131,7 +131,11 @@ app.controller('MainController', ['$scope', '$http',
 							},
 							"type": "audio"};
 						$scope.conversation.push(msg);
-						// $scope.$apply();
+						// scroll down to the bottom of conversation
+						setTimeout(function(){
+							document.querySelector(".msg_card_body")
+								.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
+						}, 50);
 					},
 					function(response) { 
 						// failed
@@ -159,9 +163,16 @@ app.controller('MainController', ['$scope', '$http',
 			$scope.stop();
 			//hold for 1s to start recording
 			$scope.holdCounter = setTimeout(function(){
-				let snd = new Audio("/static/audio/trigger.wav");
+				// play trigger
+				let snd = new Audio("/static/audio/tone.wav");
 				snd.play();
-				$scope.startRecording();
+				setTimeout(function (){
+					$scope.startRecording();
+				}, 500); //500 is the duration of tone.wav
+				// onended DIDN'T WORK, DON'T KNOW WHY!!
+				// snd.onended = function(){
+				// 	$scope.startRecording();
+				// }
 			}, 1000);
 		}
 

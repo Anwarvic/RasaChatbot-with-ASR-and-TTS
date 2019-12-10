@@ -1,0 +1,6 @@
+parallel_wavegan
+PyYaml
+unidecode
+g2p_en
+nltk
+#ConfigArgparse

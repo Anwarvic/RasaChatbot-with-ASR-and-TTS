@@ -34,7 +34,7 @@ tmp=$(mktemp "${download_dir}/XXXXXX.${file_ext}")
 
 # Try-catch like processing
 (
-    # download (105MB)
+    # download (135MB)
     wget "https://drive.google.com/uc?export=download&id=${file_id}" -O "${tmp}"
     decompress "${tmp}" "${download_dir}"
 ) || {
@@ -47,4 +47,4 @@ tmp=$(mktemp "${download_dir}/XXXXXX.${file_ext}")
 }
 # remove tmpfiles
 rm "${tmp}"
-echo "Sucessfully downloaded transformer"
+echo "Sucessfully downloaded tts transformer"

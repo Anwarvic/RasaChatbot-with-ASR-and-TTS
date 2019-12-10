@@ -13,9 +13,18 @@ instance/
 # Environments
 py3env
 
-# additional files
+##### additional files #####
+# rasa
 rasa
+
+# asr
 ted_pretrained_v2.pth
 librispeech_pretrained_v2.pth
 ctcdecode
+
+# tts
 espnet
+fastspeech
+tacotron2
+transformer
+ljspeech.parallel_wavegan.v1

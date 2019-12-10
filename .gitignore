@@ -14,7 +14,6 @@ instance/
 py3env
 
 # additional files
-.gitignore
 rasa
 ted_pretrained_v2.pth
 librispeech_pretrained_v2.pth

@@ -6,7 +6,7 @@ app.controller('MainController', ['$scope', '$http',
 		// control app configulration
 		$scope.config = {
 			asr: false,
-			tts: false
+			tts: true
 		};
 
 		// toggle the ellipsis menu
@@ -59,10 +59,8 @@ app.controller('MainController', ['$scope', '$http',
 						.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
 				}, 50);
 				// call flask back-end
-			    $http.post('/send_message', msg['message'])
+			    $http.post('/send_message', msg['body'])
 			    .then(function(response) {
-					// success
-					console.log(response);
 					// Push the bot response
 			        response['data'].forEach(element => {
 						var msg = { "id": $scope.conversation.length,
@@ -71,17 +69,47 @@ app.controller('MainController', ['$scope', '$http',
 						if (element["text"]){
 							msg["body"] = element["text"];
 							msg["type"] = "text";
+							// check enabling tts
+							if ($scope.config.tts){
+								$http.post("/speak", msg)
+								.then(function(response){
+									let path = response["data"]["path"]
+									let snd = new Audio(path);
+									snd.play();
+									// variable to match the ASR flag
+									let asrEnabled = $scope.config.asr;
+									// show the message while playing audio
+									snd.onplaying = function(){
+										// disable ASR when playing TTS audio
+										if ($scope.config.asr){
+											$scope.config.asr = false;
+											asrActive = true;
+										}
+									}
+									snd.onended = function(){
+										if (asrEnabled){
+											$scope.config.asr = true;
+										}
+									};
+								},
+								function(response){
+									console.error(response)
+								});
+							}
 						}
 						else if (element["image"]){
 							msg["body"] = element["image"];
 							msg["type"] = "img";
 						}
-						$scope.conversation.push(msg);
+						// wait for 2s to seem more reasonable
+						setTimeout(function(){
+							$scope.conversation.push(msg);
+						}, 2000 );
 					});
 			    },
 			    function(response) { 
 		            // failed
-		            console.log(response);
+		            console.error(response);
 			    });
 			}
 		}
@@ -101,31 +129,34 @@ app.controller('MainController', ['$scope', '$http',
 			}
 		}
 		
-		// record function for the ASR
+		// counter to track holding period
 		$scope.holdCounter = 0;
+		// record function for the ASR
 		$scope.startRecording = function(){
 			return new Promise(async resolve => {
 				$scope.recorder.start();
 				console.log("START RECORDING");
 				let chunks = [];
-				$scope.recorder.ondataavailable = e => chunks.push(e.data);
+				$scope.recorder.ondataavailable = function(e){
+					chunks.push(e.data);
+				}
+				
 				let audioStart = Date.now();
 				$scope.recorder.onstop = async ()=>{
 					let audioEnd = Date.now();
-					let blob = new Blob(chunks, {'type':'audio/ogg; codecs=opus'});
+					let blob = new Blob(chunks, {'type':'audio/webm; codecs=opus'});
 					let encodedBlob = await $scope.b2text(blob);
+					let url = URL.createObjectURL(blob);
 					// send post request to flask backend
 					$http.post('/send_audio_msg', encodedBlob)
 					.then(function(response) {
 						// success
-						console.log(response["data"]["text"]);
-						// message
 						var msg = {
 							"id": $scope.conversation.length,
 							"sender": "user",
 							"time": $scope.getTime(),
 							"body": {
-								"snd": encodedBlob,
+								"snd": url,
 								"text":response["data"]["text"],
 								"duration": (audioEnd-audioStart)/1000
 							},
@@ -172,7 +203,7 @@ app.controller('MainController', ['$scope', '$http',
 				// onended DIDN'T WORK, DON'T KNOW WHY!!
 				// snd.onended = function(){
 				// 	$scope.startRecording();
-				// }
+				// };
 			}, 1000);
 		}
 

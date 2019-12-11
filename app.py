@@ -4,12 +4,12 @@ import requests
 import librosa
 import numpy as np
 from io import BytesIO
-from base64 import b64decode
-from scipy import signal
-from scipy.io import wavfile
 from pydub import AudioSegment
-from utils import parse_yaml
+from base64 import b64encode, b64decode
+
 from asr import ASR
+from tts import TTS
+from utils import parse_yaml
 
 app = flask.Flask(__name__)
 
@@ -45,17 +45,17 @@ def call_chatbot():
 
 @app.route('/send_audio_msg', methods=['POST'])
 def call_asr():
-	req = flask.request.data
-	header, *bytes_stream = req.split(b',')
+	req = flask.request.data.decode("utf-8")
+	header, *bytes_stream = req.split(',')
 	if bytes_stream:
 		bytes_stream = b64decode(bytes_stream[0])
 		audio = AudioSegment.from_file(BytesIO(bytes_stream))
 		# convert it to numpy
 		data = np.frombuffer(audio._data, dtype=np.int32)
 		# change type to np.int16 by dropping bottom 16 bits
-		# data = (data>>16).astype(np.int16)
+		data = (data>>16).astype(np.int16)
 		# change type to np.float32
-		data = data.astype('float32') / np.iinfo(np.int32).max  # normalize audio
+		data = data.astype('float32') / np.iinfo(np.int16).max  # normalize audio
 		# change sample rate from 48000 to 16000
 		data = librosa.core.resample(data, 48000, 16000)
 		# transcribe the provided data
@@ -71,10 +71,38 @@ def call_asr():
 
 
 
+
+
+@app.route('/speak', methods=['POST'])
+def call_tts():
+	msg = flask.request.data.decode('utf-8')
+	msg = flask.json.loads(msg)
+	text = msg["body"]
+	wavfilename = "static/{}.wav".format(msg["id"])
+	tts_model.synthesize(text, wavfilename)
+	# form response
+	flask_response = app.response_class(response=flask.json.dumps({"path": wavfilename}),
+										status=200,
+										mimetype='application/json')
+	return flask_response
+
+
+
+
+
+
 if __name__ == '__main__':
+	conf = parse_yaml("conf.yaml")
+	
 	# load ASR model
-	asr_conf = parse_yaml("conf.yaml")
+	asr_conf = conf["asr"]
 	asr_model = ASR(asr_conf)
+
+	# load TTS model
+	tts_conf = conf["tts"]
+	tts_model = TTS(tts_conf)
+	# tts_model.synthesize("Hello World!!")
+	
 
 	# run server
 	app.run(host="0.0.0.0", port=5000)

@@ -161,7 +161,10 @@ app.controller('MainController', ['$scope', '$http',
 								"duration": (audioEnd-audioStart)/1000
 							},
 							"type": "audio"};
-						$scope.conversation.push(msg);
+						// wait for 2s to seem more reasonable
+						setTimeout(function(){
+							$scope.conversation.push(msg);
+						}, 2000);
 						// scroll down to the bottom of conversation
 						setTimeout(function(){
 							document.querySelector(".msg_card_body")

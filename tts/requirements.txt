@@ -1,6 +1,6 @@
-parallel_wavegan
-PyYaml
-unidecode
+nltk 
 g2p_en
-nltk
-#ConfigArgparse
+PyYaml
+chainer
+unidecode
+parallel_wavegan

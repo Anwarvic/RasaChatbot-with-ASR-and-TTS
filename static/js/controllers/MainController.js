@@ -6,7 +6,7 @@ app.controller('MainController', ['$scope', '$http',
 		// control app configulration
 		$scope.config = {
 			asr: false,
-			tts: true
+			tts: false
 		};
 
 		// toggle the ellipsis menu
@@ -20,7 +20,9 @@ app.controller('MainController', ['$scope', '$http',
 		}
 		//////////////////// Variables ////////////////////
 		// basic datatype for the session conversation
-	    $scope.conversation = [];
+		$scope.conversation = [];
+		// delay between send message and getting a response
+		$scope.delay = 2000;
 
 		//////////////////// helper functions ////////////////////
 		// function to get the current time
@@ -104,7 +106,13 @@ app.controller('MainController', ['$scope', '$http',
 						// wait for 2s to seem more reasonable
 						setTimeout(function(){
 							$scope.conversation.push(msg);
-						}, 2000 );
+							$scope.$apply();
+						}, $scope.delay );
+						// scroll down to the bottom of conversation
+						setTimeout(function(){
+							document.querySelector(".msg_card_body")
+								.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
+						}, $scope.delay+50);
 					});
 			    },
 			    function(response) { 
@@ -164,12 +172,13 @@ app.controller('MainController', ['$scope', '$http',
 						// wait for 2s to seem more reasonable
 						setTimeout(function(){
 							$scope.conversation.push(msg);
-						}, 2000);
+							$scope.$apply();
+						}, $scope.delay);
 						// scroll down to the bottom of conversation
 						setTimeout(function(){
 							document.querySelector(".msg_card_body")
 								.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
-						}, 50);
+						}, $scope.delay+50);
 					},
 					function(response) { 
 						// failed

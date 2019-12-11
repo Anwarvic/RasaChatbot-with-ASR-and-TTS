@@ -11,7 +11,7 @@ from .cleaners import custom_english_cleaners
 from .utils import get_model_conf, torch_load, dynamic_import
 
 
-
+# add espnet to the system path
 sys.path.append("tts/espnet")
 
 MODEL_CONF = {

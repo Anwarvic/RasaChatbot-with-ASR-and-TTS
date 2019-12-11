@@ -32,7 +32,7 @@ app.controller('MainController', ['$scope', '$http',
 			var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 			// var dateTime = date+' '+time;
 			return time;
-		}
+		};
 
 		// covert blob bytes to URL text
 		$scope.b2text = blob => new Promise(resolve => {
@@ -52,8 +52,9 @@ app.controller('MainController', ['$scope', '$http',
 							"time": $scope.getTime(),
 							"type": "text"
 				};
+				// send with no delay
 				$scope.conversation.push(msg);
-				// clear input
+				// clear input text
 				$scope.userMsg = "";
 				// scroll down to the bottom of conversation
 				setTimeout(function(){
@@ -63,14 +64,15 @@ app.controller('MainController', ['$scope', '$http',
 				// call flask back-end
 			    $http.post('/send_message', msg['body'])
 			    .then(function(response) {
-					// Push the bot response
+					// iterates over the list of bot responses
 			        response['data'].forEach(element => {
+						// define the returned message
 						var msg = { "id": $scope.conversation.length,
 									"sender": "bot",
 									"time": $scope.getTime()};
 						if (element["text"]){
-							msg["body"] = element["text"];
 							msg["type"] = "text";
+							msg["body"] = element["text"];
 							// check enabling tts
 							if ($scope.config.tts){
 								$http.post("/speak", msg)
@@ -78,16 +80,15 @@ app.controller('MainController', ['$scope', '$http',
 									let path = response["data"]["path"]
 									let snd = new Audio(path);
 									snd.play();
-									// variable to match the ASR flag
+									// variable to match the enable ASR flag
 									let asrEnabled = $scope.config.asr;
-									// show the message while playing audio
+									// disable ASR when playing TTS audio
 									snd.onplaying = function(){
-										// disable ASR when playing TTS audio
 										if ($scope.config.asr){
 											$scope.config.asr = false;
-											asrActive = true;
 										}
-									}
+									};
+									// enable ASR again -iff it was enabled before-  
 									snd.onended = function(){
 										if (asrEnabled){
 											$scope.config.asr = true;
@@ -95,15 +96,16 @@ app.controller('MainController', ['$scope', '$http',
 									};
 								},
 								function(response){
+									//failed
 									console.error(response)
 								});
 							}
 						}
 						else if (element["image"]){
-							msg["body"] = element["image"];
 							msg["type"] = "img";
+							msg["body"] = element["image"];
 						}
-						// wait for 2s to seem more reasonable
+						// wait for 2s before responding to seem more reasonable
 						setTimeout(function(){
 							$scope.conversation.push(msg);
 							$scope.$apply();
@@ -139,7 +141,7 @@ app.controller('MainController', ['$scope', '$http',
 		
 		// counter to track holding period
 		$scope.holdCounter = 0;
-		// record function for the ASR
+		// ASR record function
 		$scope.startRecording = function(){
 			return new Promise(async resolve => {
 				$scope.recorder.start();
@@ -150,6 +152,7 @@ app.controller('MainController', ['$scope', '$http',
 				}
 				
 				let audioStart = Date.now();
+				// onstop will be called when recorde.stop is fired
 				$scope.recorder.onstop = async ()=>{
 					let audioEnd = Date.now();
 					let blob = new Blob(chunks, {'type':'audio/webm; codecs=opus'});
@@ -169,7 +172,7 @@ app.controller('MainController', ['$scope', '$http',
 								"duration": (audioEnd-audioStart)/1000
 							},
 							"type": "audio"};
-						// wait for 2s to seem more reasonable
+						// wait for 2s before responding to seem more reasonable
 						setTimeout(function(){
 							$scope.conversation.push(msg);
 							$scope.$apply();
@@ -185,26 +188,26 @@ app.controller('MainController', ['$scope', '$http',
 						console.log(response);
 					});
 				}
-				// resolve(encodedBlob);
 			});
 		}
 
-		// stop recording function for the ASR
+		// ASR stop recording function
 		$scope.stop = function(){
 			if ($scope.holdCounter){
-				console.log("Recording stopped!!");
+				// reset holdCounter
 				clearTimeout($scope.holdCounter);
 				if ($scope.recorder && $scope.recorder.state == "recording"){
 					$scope.recorder.stop();
-					console.log("STOPPED");
+					console.log("STOPPED RECORDING!!");
 				}
 			}
 		}
-
+		
+		// activate startRecording() when hold-period is met
 		$scope.record = function(){
 			console.log("record btn is clicked");
 			$scope.stop();
-			//hold for 1s to start recording
+			//hold for 1s before starting to record
 			$scope.holdCounter = setTimeout(function(){
 				// play trigger
 				let snd = new Audio("/static/audio/tone.wav");
@@ -212,6 +215,7 @@ app.controller('MainController', ['$scope', '$http',
 				setTimeout(function (){
 					$scope.startRecording();
 				}, 500); //500 is the duration of tone.wav
+
 				// onended DIDN'T WORK, DON'T KNOW WHY!!
 				// snd.onended = function(){
 				// 	$scope.startRecording();

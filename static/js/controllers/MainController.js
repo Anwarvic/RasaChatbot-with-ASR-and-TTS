@@ -42,6 +42,14 @@ function($scope, $http) {
 	});
 
 	//////////////////// Main functions ////////////////////
+	// function to view user message
+	$scope.presentUserMessage = function(userMsg){
+		console.log("USER: "); console.log(userMsg);
+		$scope.conversation.push(userMsg);
+		// clear input
+		$scope.userMsg = "";
+	};
+
 	// function to view Rasa response
 	$scope.presentRasaResponse = function(obj){
 		$http.post('/send_message', obj)
@@ -69,7 +77,7 @@ function($scope, $http) {
 			// failed
 			console.error(response);
 		});
-	}
+	};
 
 	// function to send user messages to the bot
 	$scope.sendMessage = function(){
@@ -83,19 +91,18 @@ function($scope, $http) {
 				$scope.config.asr = false;
 			}
 			var userMsg = {
-						"id": $scope.conversation.length,
-						"sender": "user",
-						"body": $scope.userMsg,
-						"time": $scope.getTime(),
-						"type": "text"
+				"id": $scope.conversation.length,
+				"sender": "user",
+				"body": $scope.userMsg,
+				"time": $scope.getTime(),
+				"type": "text"
 			};
-			console.log("USER: "); console.log(userMsg);
-			$scope.conversation.push(userMsg);
-			// clear input
-			$scope.userMsg = "";
+			// show user message
+			$scope.presentUserMessage(userMsg);
 			// call flask back-end
 			let tmp = { "message": userMsg,
 						"useTTS": $scope.config.tts}
+			// show Rasa response
 			$scope.presentRasaResponse(tmp);
 			// enable sending again
 			$scope.enableSending = true;
@@ -104,7 +111,8 @@ function($scope, $http) {
 				$scope.config.asr = true;
 			}
 		}
-	}
+	};
+
 	// get browser mic permission
 	$scope.haveMicPermission = false;
 	$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
@@ -119,7 +127,7 @@ function($scope, $http) {
 				$scope.recorder = new MediaRecorder(stream)
 			});
 		}
-	}
+	};
 	
 	// counter to track holding period
 	$scope.holdCounter = 0;
@@ -162,7 +170,7 @@ function($scope, $http) {
 				});
 			}
 		});
-	}
+	};
 
 	// stop recording function for the ASR
 	$scope.stop = function(){
@@ -174,7 +182,7 @@ function($scope, $http) {
 				console.log("STOPPED");
 			}
 		}
-	}
+	};
 
 	$scope.record = function(){
 		console.log("record btn is clicked");
@@ -192,7 +200,7 @@ function($scope, $http) {
 			// 	$scope.startRecording();
 			// };
 		}, 1000);
-	}
+	};
 
 	// play audio file
 	$scope.play = function(id){
@@ -211,7 +219,7 @@ function($scope, $http) {
 			// remove the shadow-transition effect
 			document.getElementById("msg#"+id).removeAttribute('style');
 		};
-	}
+	};
 
 	// play audio returned from TTS
 	$scope.TTSplay = async function(path){
@@ -226,7 +234,8 @@ function($scope, $http) {
 			console.log("tts ended "+path);
 		};
 		return snd;
-	}
+	};
+
 }]);
 
 

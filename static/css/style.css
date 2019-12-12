@@ -56,7 +56,14 @@ a{
    	outline:0px !important;
 }
 
-.send_btn1{
+.send_btn1:disabled{
+	border-radius: 0 15px 15px 0 !important;
+	background-color: rgba(0,0,0,0.3) !important;
+	border:0 !important;
+	color: #808080 !important;
+}
+
+.send_btn1:enabled{
 	border-radius: 0 15px 15px 0 !important;
 	background-color: rgba(0,0,0,0.3) !important;
 	border:0 !important;

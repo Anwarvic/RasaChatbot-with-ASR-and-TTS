@@ -6,7 +6,7 @@ function($scope, $http) {
 	// control app configulration
 	$scope.config = {
 		asr: false,
-		tts: false
+		tts: true
 	};
 
 	// toggle the ellipsis menu
@@ -42,6 +42,35 @@ function($scope, $http) {
 	});
 
 	//////////////////// Main functions ////////////////////
+	// function to view Rasa response
+	$scope.presentRasaResponse = function(obj){
+		$http.post('/send_message', obj)
+		.then(function(response) {
+			response['data'].forEach(async function(element) {
+				// formulate bot response
+				var rasaMsg = { "id": $scope.conversation.length,
+								"sender": "bot",
+								"time": $scope.getTime(),
+								"type": element["type"],
+								"body": element["body"]};
+				if (element["path"]){
+					// wait for TTS
+					let promise = $scope.TTSplay(element["path"]);
+					promise.then(function(snd){
+						snd.play();
+					});
+				}
+				console.log("RASA: "); console.log(rasaMsg);
+				// Push the bot response
+				$scope.conversation.push(rasaMsg);
+			});
+		},
+		function(response) { 
+			// failed
+			console.error(response);
+		});
+	}
+
 	// function to send user messages to the bot
 	$scope.sendMessage = function(){
 		if ($scope.userMsg && $scope.enableSending){
@@ -67,37 +96,13 @@ function($scope, $http) {
 			// call flask back-end
 			let tmp = { "message": userMsg,
 						"useTTS": $scope.config.tts}
-			$http.post('/send_message', tmp)
-			.then(function(response) {
-				response['data'].forEach(async function(element) {
-					// formulate bot response
-					var rasaMsg = { "id": $scope.conversation.length,
-									"sender": "bot",
-									"time": $scope.getTime(),
-									"type": element["type"],
-									"body": element["body"]};
-					if (element["path"]){
-						// wait for TTS
-						let promise = $scope.TTSplay(element["path"]);
-						promise.then(function(snd){
-							snd.play();
-						});
-					}
-					console.log("RASA: "); console.log(rasaMsg);
-					// Push the bot response
-					$scope.conversation.push(rasaMsg);
-					// enable sending again
-					$scope.enableSending = true;
-					// enable ASR again (iff it was enabled before)
-					if (asrEnabled){
-						$scope.config.asr = true;
-					}
-				});
-			},
-			function(response) { 
-				// failed
-				console.error(response);
-			});
+			$scope.presentRasaResponse(tmp);
+			// enable sending again
+			$scope.enableSending = true;
+			// enable ASR again (iff it was enabled before)
+			if (asrEnabled){
+				$scope.config.asr = true;
+			}
 		}
 	}
 	// get browser mic permission
@@ -149,6 +154,7 @@ function($scope, $http) {
 						},
 						"type": "audio"};
 					$scope.conversation.push(msg);
+					// send this message to the backend
 				},
 				function(response) { 
 					// failed

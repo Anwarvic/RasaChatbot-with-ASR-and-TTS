@@ -121,23 +121,6 @@ def call_asr():
 
 
 
-@app.route('/speak', methods=['POST'])
-def call_tts():
-	msg = flask.request.data.decode('utf-8')
-	msg = flask.json.loads(msg)
-	text = msg["body"]
-	
-	# form response
-	flask_response = app.response_class(response=flask.json.dumps({"path": wavfilename}),
-										status=200,
-										mimetype='application/json')
-	return flask_response
-
-
-
-
-
-
 if __name__ == '__main__':
 	conf = parse_yaml("conf.yaml")
 	

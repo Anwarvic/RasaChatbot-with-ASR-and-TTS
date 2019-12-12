@@ -21,25 +21,73 @@ def index():
 
 @app.route('/send_message', methods=['POST'])
 def call_chatbot():
-	# send message to Rasa 
-	msg = flask.request.data.decode('utf-8')
-	rasa_data = flask.json.dumps({"sender": "Rasa", "message": msg})
-	# some requests get lost, loop till you get a response
+	"""
+	This function does the following:
+	- sends the given data to Rasa server running in the background
+	- parse the server response, get the content.
+	- if the tts is enabled, passes the text to the TTS
+	- returns the result
+
+	Given:
+		the given data is on the following structure:
+		{
+			"useTTS": bool, 
+			"message": {
+				"id": int,
+				"sender": "user",
+				"body": str,
+				"time": str,
+				"type": "text"
+			}
+		 }
+
+	Returns:
+		the returned object is on the following structure:
+		[{ "id": int, "type": "text"/"image", "body": str, "path": str },
+		 { "id": int, "type": "text"/"image", "body": str, "path": str },
+		 ...
+		]
+	"""
+	# prase the given data
+	data = flask.json.loads(flask.request.data.decode('utf-8'))
+	use_tts, msg = data["useTTS"], data["message"]
+	current_id = msg["id"]
+	
+	result = []
+	# call rasa: some requests get lost, loop till you get a response
 	while(True):
 		try:
-			res = requests.post(url="http://localhost:5005/webhooks/rest/webhook",
-								data=rasa_data,
-								timeout=5)
-			res = res.json()
+			# rasa rest API
+			url = "http://localhost:5005/webhooks/rest/webhook"
+			# rasa request must have a "sender" and "message" keys
+			data = flask.json.dumps({"sender": "Rasa", "message": msg["body"]})
+			res = requests.post(url=url, data=data, timeout=5).json()
 		except:
+			# mimic the rasa response when something wrong happens
 			res = [{'recipient_id': 'Rasa',
-					'text': "[Something went wrong, we didn't get any response]"}]
+					'text': "[Something went wrong]"}]
 		if res: break
 	print(res)
-	flask_response = app.response_class(response=flask.json.dumps(res),
+	for item in res:
+		d = {}
+		current_id += 1
+		d["id"] = current_id
+		d["type"] =  "text" if "text" in item.keys() else "image"
+		d["body"] = item[d["type"]]
+		if use_tts and "text" in item.keys():
+			wavfilename = "static/{}.wav".format(current_id)
+			if os.path.exists(wavfilename):
+				os.remove(wavfilename)
+			tts_model.synthesize(d["body"], wavfilename)
+			d["path"] = wavfilename
+		result.append(d)
+	print(result)
+	# get back the result
+	flask_response = app.response_class(response=flask.json.dumps(result),
 										status=200,
 										mimetype='application/json' )
 	return flask_response
+	# return flask.jsonify(success=True)
 
 
 
@@ -78,8 +126,7 @@ def call_tts():
 	msg = flask.request.data.decode('utf-8')
 	msg = flask.json.loads(msg)
 	text = msg["body"]
-	wavfilename = "static/{}.wav".format(msg["id"])
-	tts_model.synthesize(text, wavfilename)
+	
 	# form response
 	flask_response = app.response_class(response=flask.json.dumps({"path": wavfilename}),
 										status=200,
@@ -94,15 +141,13 @@ def call_tts():
 if __name__ == '__main__':
 	conf = parse_yaml("conf.yaml")
 	
-	# load ASR model
-	asr_conf = conf["asr"]
-	asr_model = ASR(asr_conf)
+	# # load ASR model
+	# asr_conf = conf["asr"]
+	# asr_model = ASR(asr_conf)
 
 	# load TTS model
 	tts_conf = conf["tts"]
 	tts_model = TTS(tts_conf)
-	# tts_model.synthesize("Hello World!!")
-	
 
 	# run server
 	app.run(host="0.0.0.0", port=5000)

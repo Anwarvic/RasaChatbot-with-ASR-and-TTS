@@ -54,31 +54,31 @@ function($scope, $http) {
 						"time": $scope.getTime(),
 						"type": "text"
 			};
+			console.log("USER: "); console.log(userMsg);
 			$scope.conversation.push(userMsg);
 			// clear input
 			$scope.userMsg = "";
 			// call flask back-end
-			$http.post('/send_message', userMsg['body'])
+			let tmp = { "message": userMsg,
+						"useTTS": $scope.config.tts}
+			$http.post('/send_message', tmp)
 			.then(function(response) {
-				// Push the bot response
 				response['data'].forEach(async function(element) {
+					// formulate bot response
 					var rasaMsg = { "id": $scope.conversation.length,
-								"sender": "bot",
-								"time": $scope.getTime()};
-					if (element["text"]){
-						rasaMsg["body"] = element["text"];
-						rasaMsg["type"] = "text";
+									"sender": "bot",
+									"time": $scope.getTime(),
+									"type": element["type"],
+									"body": element["body"]};
+					if (element["path"]){
+						// wait for TTS
+						let promise = $scope.TTSplay(element["path"]);
+						promise.then(function(snd){
+							snd.play();
+						});
 					}
-					else if (element["image"]){
-						rasaMsg["body"] = element["image"];
-						rasaMsg["type"] = "img";
-					}
-					await $scope.TTSplay(rasaMsg);
-					console.log(rasaMsg);
-					// wait for 2s to seem more reasonable
-					// setTimeout(function(){
-					// 	$scope.conversation.push(msg);
-					// }, $scope.delay);
+					console.log("RASA: "); console.log(rasaMsg);
+					// Push the bot response
 					$scope.conversation.push(rasaMsg);
 				});
 			},
@@ -202,41 +202,31 @@ function($scope, $http) {
 	}
 
 	// play audio returned from TTS
-	$scope.TTSplay = async function(msg){
-		// check enabling tts
-		if ($scope.config.tts && msg["type"] == "text"){
-			$http.post("/speak", msg)
-			.then(function(response){
-				let path = response["data"]["path"]
-				let snd = new Audio(path);
-				// variable to match the ASR flag
-				let asrEnabled = $scope.config.asr;
-				// fires when TTS audio is playing
-				snd.onplaying = function(){
-					console.log("tts playing!!");
-					// disable sending
-					$scope.enableSending = false;
-					// deactivate ASR temporarily
-					if ($scope.config.asr){
-						$scope.config.asr = false;
-					}
-				};
-				// fires when TTS audio ends
-				snd.onended = function(){
-					// enable sending
-					$scope.enableSending = true;
-					// enable ASR again (iff it was enabled before)
-					if (asrEnabled){
-						$scope.config.asr = true;
-					}
-				};
-				snd.play();
-			},
-			function(response){
-				//failed
-				console.error(response)
-			});
-		}
+	$scope.TTSplay = async function(path){
+		console.log(path);
+		let snd = new Audio(path);
+		// variable to match the ASR flag
+		let asrEnabled = $scope.config.asr;
+		// fires when TTS audio is playing
+		snd.onplaying = function(){
+			console.log("tts playing "+path);
+			// disable sending
+			$scope.enableSending = false;
+			// deactivate ASR temporarily
+			if ($scope.config.asr){
+				$scope.config.asr = false;
+			}
+		};
+		// fires when TTS audio ends
+		snd.onended = function(){
+			// enable sending
+			$scope.enableSending = true;
+			// enable ASR again (iff it was enabled before)
+			if (asrEnabled){
+				$scope.config.asr = true;
+			}
+		};
+		return snd;
 	}
 
 }]);

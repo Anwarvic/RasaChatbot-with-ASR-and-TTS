@@ -96,7 +96,7 @@
 						<button class="input-group-text send_btn send_btn2" ng-disabled="!config.asr" title="{a micTitle a}" ng-mousedown="record()" ng-mouseup="stop()">
 							<i class="fas fa-microphone-alt"></i>
 						</button>
-						<button class="input-group-text send_btn send_btn1" ng-click="sendMessage()">
+						<button class="input-group-text send_btn send_btn1" ng-click="sendMessage()" ng-disabled="!enableSending">
 							<i class="fas fa-location-arrow"></i>
 						</button>
 					</div>

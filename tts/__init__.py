@@ -108,6 +108,7 @@ class TTS():
                 self.vocoder_config["generator_params"]["aux_context_window"])(c.unsqueeze(0).transpose(2, 1))
             y = self.vocoder(z, c).view(-1)
         wav = y.view(-1).cpu().numpy()
+        #TODO: don't write and return the numpy.array
         wavfile.write(filename, self.vocoder_config["sampling_rate"], wav)
         # return wav
 

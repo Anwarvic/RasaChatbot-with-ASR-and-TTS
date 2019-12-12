@@ -6,7 +6,7 @@ app.controller('MainController', ['$scope', '$http',
 		// control app configulration
 		$scope.config = {
 			asr: false,
-			tts: false
+			tts: true
 		};
 
 		// toggle the ellipsis menu
@@ -23,6 +23,8 @@ app.controller('MainController', ['$scope', '$http',
 		$scope.conversation = [];
 		// delay between send message and getting a response
 		$scope.delay = 2000;
+		// variable to control sending
+		$scope.enableSending = true;
 
 		//////////////////// helper functions ////////////////////
 		// function to get the current time
@@ -44,7 +46,7 @@ app.controller('MainController', ['$scope', '$http',
 		//////////////////// Main functions ////////////////////
 	    // function to send user messages to the bot
 		$scope.sendMessage = function(){
-			if ($scope.userMsg){
+			if ($scope.userMsg && $scope.enableSending){
 				var msg = {
 							"id": $scope.conversation.length,
 							"sender": "user",
@@ -64,6 +66,7 @@ app.controller('MainController', ['$scope', '$http',
 				// call flask back-end
 			    $http.post('/send_message', msg['body'])
 			    .then(function(response) {
+					console.log("RASA RESPONDS");
 					// iterates over the list of bot responses
 			        response['data'].forEach(element => {
 						// define the returned message
@@ -77,19 +80,25 @@ app.controller('MainController', ['$scope', '$http',
 							if ($scope.config.tts){
 								$http.post("/speak", msg)
 								.then(function(response){
-									let path = response["data"]["path"]
-									let snd = new Audio(path);
+									let path = response["data"]["path"];
+									var snd = new Audio(path);
 									snd.play();
 									// variable to match the enable ASR flag
 									let asrEnabled = $scope.config.asr;
 									// disable ASR when playing TTS audio
 									snd.onplaying = function(){
+										console.log("tts playing!!");
+										// disable sending
+										$scope.enableSending = false;
+										// deactivate ASR temporarily
 										if ($scope.config.asr){
 											$scope.config.asr = false;
 										}
 									};
-									// enable ASR again -iff it was enabled before-  
 									snd.onended = function(){
+										// enable sending
+										$scope.enableSending = true;
+										// enable ASR again (iff it was enabled before)
 										if (asrEnabled){
 											$scope.config.asr = true;
 										}

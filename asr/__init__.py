@@ -3,6 +3,7 @@ import yaml
 import torch
 import librosa
 import numpy as np
+
 from .model import DeepSpeech
 
 
@@ -75,6 +76,6 @@ class ASR():
                 if self.conf["offsets"]:
                     result['offsets'] = decoded_offsets[b][pi].tolist()
                 output.append(result)
-        print(output[0]['transcription'])
+        # print(output[0]['transcription'])
         return output[0]['transcription']
 

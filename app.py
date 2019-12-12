@@ -124,9 +124,9 @@ def call_asr():
 if __name__ == '__main__':
 	conf = parse_yaml("conf.yaml")
 	
-	# # load ASR model
-	# asr_conf = conf["asr"]
-	# asr_model = ASR(asr_conf)
+	# load ASR model
+	asr_conf = conf["asr"]
+	asr_model = ASR(asr_conf)
 
 	# load TTS model
 	tts_conf = conf["tts"]

@@ -6,7 +6,7 @@ function($scope, $http) {
 	// control app configulration
 	$scope.config = {
 		asr: false,
-		tts: true
+		tts: false
 	};
 
 	// toggle the ellipsis menu
@@ -21,8 +21,6 @@ function($scope, $http) {
 	//////////////////// Variables ////////////////////
 	// basic datatype for the session conversation
 	$scope.conversation = [];
-	// delay between send message and getting a response
-	$scope.delay = 2000;
 	// variable to control sending
     $scope.enableSending = true;
 
@@ -47,6 +45,14 @@ function($scope, $http) {
 	// function to send user messages to the bot
 	$scope.sendMessage = function(){
 		if ($scope.userMsg && $scope.enableSending){
+			// disable sending
+			$scope.enableSending = false;
+			// variable to match the ASR flag
+			let asrEnabled = $scope.config.asr;
+			// deactivate ASR temporarily
+			if ($scope.config.asr){
+				$scope.config.asr = false;
+			}
 			var userMsg = {
 						"id": $scope.conversation.length,
 						"sender": "user",
@@ -80,6 +86,12 @@ function($scope, $http) {
 					console.log("RASA: "); console.log(rasaMsg);
 					// Push the bot response
 					$scope.conversation.push(rasaMsg);
+					// enable sending again
+					$scope.enableSending = true;
+					// enable ASR again (iff it was enabled before)
+					if (asrEnabled){
+						$scope.config.asr = true;
+					}
 				});
 			},
 			function(response) { 
@@ -100,7 +112,7 @@ function($scope, $http) {
 			return new Promise(async resolve => {
 				stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 				$scope.recorder = new MediaRecorder(stream)
-			  });
+			});
 		}
 	}
 	
@@ -137,18 +149,12 @@ function($scope, $http) {
 						},
 						"type": "audio"};
 					$scope.conversation.push(msg);
-					// scroll down to the bottom of conversation
-					setTimeout(function(){
-						document.querySelector(".msg_card_body")
-							.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
-					}, 50);
 				},
 				function(response) { 
 					// failed
 					console.log(response);
 				});
 			}
-			// resolve(encodedBlob);
 		});
 	}
 
@@ -205,30 +211,16 @@ function($scope, $http) {
 	$scope.TTSplay = async function(path){
 		console.log(path);
 		let snd = new Audio(path);
-		// variable to match the ASR flag
-		let asrEnabled = $scope.config.asr;
 		// fires when TTS audio is playing
 		snd.onplaying = function(){
 			console.log("tts playing "+path);
-			// disable sending
-			$scope.enableSending = false;
-			// deactivate ASR temporarily
-			if ($scope.config.asr){
-				$scope.config.asr = false;
-			}
 		};
 		// fires when TTS audio ends
 		snd.onended = function(){
-			// enable sending
-			$scope.enableSending = true;
-			// enable ASR again (iff it was enabled before)
-			if (asrEnabled){
-				$scope.config.asr = true;
-			}
+			console.log("tts ended "+path);
 		};
 		return snd;
 	}
-
 }]);
 
 

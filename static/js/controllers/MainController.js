@@ -22,7 +22,9 @@ function($scope, $http) {
 	// basic datatype for the session conversation
 	$scope.conversation = [];
 	// delay between send message and getting a response
-    $scope.delay = 2000;
+	$scope.delay = 2000;
+	// variable to control sending
+    $scope.enableSending = true;
 
 	//////////////////// helper functions ////////////////////
 	// function to get the current time
@@ -44,69 +46,40 @@ function($scope, $http) {
 	//////////////////// Main functions ////////////////////
 	// function to send user messages to the bot
 	$scope.sendMessage = function(){
-		if ($scope.userMsg){
-			var msg = {
+		if ($scope.userMsg && $scope.enableSending){
+			var userMsg = {
 						"id": $scope.conversation.length,
 						"sender": "user",
 						"body": $scope.userMsg,
 						"time": $scope.getTime(),
 						"type": "text"
 			};
-			$scope.conversation.push(msg);
+			$scope.conversation.push(userMsg);
 			// clear input
 			$scope.userMsg = "";
-			// // scroll down to the bottom of conversation
-			// setTimeout(function(){
-			// 	document.querySelector(".msg_card_body")
-			// 		.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
-			// }, 50);
 			// call flask back-end
-			$http.post('/send_message', msg['body'])
+			$http.post('/send_message', userMsg['body'])
 			.then(function(response) {
 				// Push the bot response
-				response['data'].forEach(element => {
-					var msg = { "id": $scope.conversation.length,
+				response['data'].forEach(async function(element) {
+					var rasaMsg = { "id": $scope.conversation.length,
 								"sender": "bot",
 								"time": $scope.getTime()};
 					if (element["text"]){
-						msg["body"] = element["text"];
-						msg["type"] = "text";
-						// check enabling tts
-						if ($scope.config.tts){
-							$http.post("/speak", msg)
-							.then(function(response){
-								let path = response["data"]["path"]
-								let snd = new Audio(path);
-								snd.play();
-								// variable to match the ASR flag
-								let asrEnabled = $scope.config.asr;
-								// show the message while playing audio
-								snd.onplaying = function(){
-									// disable ASR when playing TTS audio
-									if ($scope.config.asr){
-										$scope.config.asr = false;
-										asrActive = true;
-									}
-								}
-								snd.onended = function(){
-									if (asrEnabled){
-										$scope.config.asr = true;
-									}
-								};
-							},
-							function(response){
-								console.error(response)
-							});
-						}
+						rasaMsg["body"] = element["text"];
+						rasaMsg["type"] = "text";
 					}
 					else if (element["image"]){
-						msg["body"] = element["image"];
-						msg["type"] = "img";
+						rasaMsg["body"] = element["image"];
+						rasaMsg["type"] = "img";
 					}
+					await $scope.TTSplay(rasaMsg);
+					console.log(rasaMsg);
 					// wait for 2s to seem more reasonable
-					setTimeout(function(){
-						$scope.conversation.push(msg);
-					}, $scope.delay);
+					// setTimeout(function(){
+					// 	$scope.conversation.push(msg);
+					// }, $scope.delay);
+					$scope.conversation.push(rasaMsg);
 				});
 			},
 			function(response) { 
@@ -227,8 +200,46 @@ function($scope, $http) {
 			document.getElementById("msg#"+id).removeAttribute('style');
 		};
 	}
-}
-]);
+
+	// play audio returned from TTS
+	$scope.TTSplay = async function(msg){
+		// check enabling tts
+		if ($scope.config.tts && msg["type"] == "text"){
+			$http.post("/speak", msg)
+			.then(function(response){
+				let path = response["data"]["path"]
+				let snd = new Audio(path);
+				// variable to match the ASR flag
+				let asrEnabled = $scope.config.asr;
+				// fires when TTS audio is playing
+				snd.onplaying = function(){
+					console.log("tts playing!!");
+					// disable sending
+					$scope.enableSending = false;
+					// deactivate ASR temporarily
+					if ($scope.config.asr){
+						$scope.config.asr = false;
+					}
+				};
+				// fires when TTS audio ends
+				snd.onended = function(){
+					// enable sending
+					$scope.enableSending = true;
+					// enable ASR again (iff it was enabled before)
+					if (asrEnabled){
+						$scope.config.asr = true;
+					}
+				};
+				snd.play();
+			},
+			function(response){
+				//failed
+				console.error(response)
+			});
+		}
+	}
+
+}]);
 
 
 app.directive('scrollToBottom', function($timeout, $window) {

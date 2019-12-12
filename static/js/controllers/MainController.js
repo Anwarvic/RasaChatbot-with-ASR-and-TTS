@@ -21,6 +21,8 @@ function($scope, $http) {
 	//////////////////// Variables ////////////////////
 	// basic datatype for the session conversation
 	$scope.conversation = [];
+	// delay between send message and getting a response
+    $scope.delay = 2000;
 
 	//////////////////// helper functions ////////////////////
 	// function to get the current time
@@ -104,7 +106,7 @@ function($scope, $http) {
 					// wait for 2s to seem more reasonable
 					setTimeout(function(){
 						$scope.conversation.push(msg);
-					}, 2000 );
+					}, $scope.delay );
 				});
 			},
 			function(response) { 

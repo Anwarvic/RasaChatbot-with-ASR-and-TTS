@@ -55,11 +55,11 @@ function($scope, $http) {
 			$scope.conversation.push(msg);
 			// clear input
 			$scope.userMsg = "";
-			// scroll down to the bottom of conversation
-			setTimeout(function(){
-				document.querySelector(".msg_card_body")
-					.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
-			}, 50);
+			// // scroll down to the bottom of conversation
+			// setTimeout(function(){
+			// 	document.querySelector(".msg_card_body")
+			// 		.scrollTo(0, document.querySelector(".msg_card_body").scrollHeight)
+			// }, 50);
 			// call flask back-end
 			$http.post('/send_message', msg['body'])
 			.then(function(response) {
@@ -106,7 +106,7 @@ function($scope, $http) {
 					// wait for 2s to seem more reasonable
 					setTimeout(function(){
 						$scope.conversation.push(msg);
-					}, $scope.delay );
+					}, $scope.delay);
 				});
 			},
 			function(response) { 
@@ -229,3 +229,23 @@ function($scope, $http) {
 	}
 }
 ]);
+
+
+app.directive('scrollToBottom', function($timeout, $window) {
+    return {
+        scope: {
+            scrollToBottom: "="
+        },
+        restrict: 'A',
+        link: function(scope, element, attr) {
+            scope.$watchCollection('scrollToBottom', function(newVal) {
+                if (newVal) {
+                    $timeout(function() {
+                        element[0].scrollTop =  element[0].scrollHeight;
+                    }, 0);
+                }
+
+            });
+        }
+    };
+});

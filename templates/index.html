@@ -52,7 +52,7 @@
 					</ul>
 				</div>
 			</div>
-			<div class="card-body msg_card_body" ng-click="untoggle()">
+			<div class="card-body msg_card_body" ng-click="untoggle()" scroll-to-bottom="conversation">
 				<div ng-repeat="msg in conversation">
 					
 					<div class="d-flex justify-content-end mb-4" ng-if=" msg.sender== 'user' ">

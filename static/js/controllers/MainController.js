@@ -44,43 +44,50 @@ function($scope, $http) {
 	//////////////////// Main functions ////////////////////
 	// function to view user message
 	$scope.presentUserMessage = function(userMsg){
-		console.log("USER: "); console.log(userMsg);
-		$scope.conversation.push(userMsg);
-		// clear input
-		$scope.userMsg = "";
+		return new Promise((resolve, reject) => {
+			console.log("USER: "); console.log(userMsg);
+			$scope.conversation.push(userMsg);
+			// clear input
+			$scope.userMsg = "";
+			resolve("User Message Presented!!")
+		});
 	};
 
 	// function to view Rasa response
 	$scope.presentRasaResponse = function(obj){
-		$http.post('/send_message', obj)
-		.then(function(response) {
-			response['data'].forEach(async function(element) {
-				// formulate bot response
-				var rasaMsg = { "id": $scope.conversation.length,
-								"sender": "bot",
-								"time": $scope.getTime(),
-								"type": element["type"],
-								"body": element["body"]};
-				if (element["path"]){
-					// wait for TTS
-					let promise = $scope.TTSplay(element["path"]);
-					promise.then(function(snd){
-						snd.play();
-					});
-				}
-				console.log("RASA: "); console.log(rasaMsg);
-				// Push the bot response
-				$scope.conversation.push(rasaMsg);
+		return new Promise((resolve, reject) => {
+			$http.post('/send_message', obj)
+			.then(function(response) {
+				response['data'].forEach(async function(element) {
+					// formulate bot response
+					var rasaMsg = { "id": $scope.conversation.length,
+									"sender": "bot",
+									"time": $scope.getTime(),
+									"type": element["type"],
+									"body": element["body"]};
+					if (element["path"]){
+						// wait for TTS
+						let promise = $scope.TTSplay(element["path"]);
+						promise.then(function(snd){
+							snd.play();
+						});
+					}
+					console.log("RASA: "); console.log(rasaMsg);
+					// Push the bot response
+					$scope.conversation.push(rasaMsg);
+					resolve ("Rasa Response presented!!");
+				});
+			},
+			function(response) { 
+				// failed
+				console.error(response);
+				reject("Rasa Response Suspended!!")
 			});
-		},
-		function(response) { 
-			// failed
-			console.error(response);
 		});
 	};
 
 	// function to send user messages to the bot
-	$scope.sendMessage = function(){
+	$scope.sendMessage = async function(){
 		if ($scope.userMsg && $scope.enableSending){
 			// disable sending
 			$scope.enableSending = false;
@@ -98,18 +105,22 @@ function($scope, $http) {
 				"type": "text"
 			};
 			// show user message
-			$scope.presentUserMessage(userMsg);
-			// call flask back-end
-			let tmp = { "message": userMsg,
-						"useTTS": $scope.config.tts}
-			// show Rasa response
-			$scope.presentRasaResponse(tmp);
-			// enable sending again
-			$scope.enableSending = true;
-			// enable ASR again (iff it was enabled before)
-			if (asrEnabled){
-				$scope.config.asr = true;
-			}
+			let userPromise = $scope.presentUserMessage(userMsg);
+			userPromise.then(function(){
+				// call flask back-end
+				let tmp = { "message": userMsg,
+							"useTTS": $scope.config.tts}
+				// show Rasa response
+				let rasaPromise = $scope.presentRasaResponse(tmp);
+				rasaPromise.then(function(){
+					// enable sending again
+					$scope.enableSending = true;
+					// enable ASR again (iff it was enabled before)
+					if (asrEnabled){
+						$scope.config.asr = true;
+					}
+				});
+			})
 		}
 	};
 

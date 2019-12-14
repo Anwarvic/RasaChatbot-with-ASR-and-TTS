@@ -89,14 +89,14 @@
 			</div>
 			<div class="card-footer" ng-click="untoggle()">
 				<div class="input-group">
-					<form ng-submit="sendMessage()" class="form-control type_msg">
+					<form ng-submit="submitMessage()" class="form-control type_msg">
 						<input class="form-control" style="height:100%" placeholder="Type your message..." ng-model="userMsg">
 					</form>
 					<div class="input-group-append">
 						<button class="input-group-text send_btn send_btn2" ng-disabled="!config.asr" title="{a micTitle a}" ng-mousedown="record()" ng-mouseup="stop()">
 							<i class="fas fa-microphone-alt"></i>
 						</button>
-						<button class="input-group-text send_btn send_btn1" ng-click="sendMessage()" ng-disabled="!enableSending">
+						<button class="input-group-text send_btn send_btn1" ng-click="submitMessage()" ng-disabled="!enableSending">
 							<i class="fas fa-location-arrow"></i>
 						</button>
 					</div>

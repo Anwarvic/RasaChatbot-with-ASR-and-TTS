@@ -55,7 +55,7 @@ function($scope, $http) {
 
 	// function to view Rasa response
 	$scope.presentRasaResponse = function(obj){
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve, reject) =>{
 			$http.post('/send_message', obj)
 			.then(function(response) {
 				response['data'].forEach(async function(element) {
@@ -86,42 +86,56 @@ function($scope, $http) {
 		});
 	};
 
-	// function to send user messages to the bot
-	$scope.sendMessage = async function(){
+	// function to 
+	$scope.submitMessage = function(){
 		if ($scope.userMsg && $scope.enableSending){
-			// disable sending
-			$scope.enableSending = false;
-			// variable to match the ASR flag
-			let asrEnabled = $scope.config.asr;
-			// deactivate ASR temporarily
-			if ($scope.config.asr){
-				$scope.config.asr = false;
-			}
-			var userMsg = {
+			var userTextMsg = {
 				"id": $scope.conversation.length,
 				"sender": "user",
 				"body": $scope.userMsg,
 				"time": $scope.getTime(),
 				"type": "text"
 			};
-			// show user message
-			let userPromise = $scope.presentUserMessage(userMsg);
-			userPromise.then(function(){
-				// call flask back-end
-				let tmp = { "message": userMsg,
-							"useTTS": $scope.config.tts}
-				// show Rasa response
-				let rasaPromise = $scope.presentRasaResponse(tmp);
-				rasaPromise.then(function(){
-					// enable sending again
-					$scope.enableSending = true;
-					// enable ASR again (iff it was enabled before)
-					if (asrEnabled){
-						$scope.config.asr = true;
-					}
-				});
-			})
+			// send message to Rasa server
+			$scope.sendMessage(userTextMsg);
 		}
+	}
+	
+	// function to send user messages to the bot
+	$scope.sendMessage = async function(userMsg){
+		// disable sending
+		$scope.enableSending = false;
+		// variable to match the ASR flag
+		let asrEnabled = $scope.config.asr;
+		// deactivate ASR temporarily
+		if ($scope.config.asr){
+			$scope.config.asr = false;
+		}
+		// show user message if it was text
+		let userPromise = $scope.presentUserMessage(userMsg);
+		userPromise.then(function(){
+			// call flask back-end
+			let msg = {
+				"id": userMsg["id"],
+				"useTTS": $scope.config.tts
+			};
+			if (userMsg["type"] == "audio"){
+				msg["text"] = userMsg["body"]["text"];
+			}
+			else if (userMsg["type"] == "text"){
+				msg["text"] = userMsg["body"];
+			}
+			// show Rasa response
+			let rasaPromise = $scope.presentRasaResponse(msg);
+			rasaPromise.then(function(){
+				// enable sending again
+				$scope.enableSending = true;
+				// enable ASR again (iff it was enabled before)
+				if (asrEnabled){
+					$scope.config.asr = true;
+				}
+			});
+		})
 	};
 
 	// get browser mic permission
@@ -162,7 +176,7 @@ function($scope, $http) {
 				$http.post('/send_audio_msg', encodedBlob)
 				.then(function(response) {
 					// success
-					var msg = {
+					var userAudioMsg = {
 						"id": $scope.conversation.length,
 						"sender": "user",
 						"time": $scope.getTime(),
@@ -172,8 +186,10 @@ function($scope, $http) {
 							"duration": (audioEnd-audioStart)/1000
 						},
 						"type": "audio"};
-					$scope.conversation.push(msg);
-					// send this message to the backend
+					// send message to Rasa server
+					$scope.userMsg = userAudioMsg["body"]["text"];
+					$scope.sendMessage(userAudioMsg);
+
 				},
 				function(response) { 
 					// failed

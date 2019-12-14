@@ -32,26 +32,21 @@ def call_chatbot():
 		the given data is on the following structure:
 		{
 			"useTTS": bool, 
-			"message": {
-				"id": int,
-				"sender": "user",
-				"body": str,
-				"time": str,
-				"type": "text"
+			"text": str,
+			"id": int
 			}
 		 }
 
 	Returns:
 		the returned object is on the following structure:
-		[{ "id": int, "type": "text"/"image", "body": str, "path": str },
-		 { "id": int, "type": "text"/"image", "body": str, "path": str },
+		[{ "id": int, "type": "text"/"image", "body": str, "path": str (optional) },
+		 { "id": int, "type": "text"/"image", "body": str, "path": str (optional) },
 		 ...
 		]
 	"""
 	# prase the given data
 	data = flask.json.loads(flask.request.data.decode('utf-8'))
-	use_tts, msg = data["useTTS"], data["message"]
-	current_id = msg["id"]
+	use_tts, text, current_id= data["useTTS"], data["text"], data["id"]
 	
 	result = []
 	# call rasa: some requests get lost, loop till you get a response
@@ -60,8 +55,10 @@ def call_chatbot():
 			# rasa rest API
 			url = "http://localhost:5005/webhooks/rest/webhook"
 			# rasa request must have a "sender" and "message" keys
-			data = flask.json.dumps({"sender": "Rasa", "message": msg["body"]})
-			res = requests.post(url=url, data=data, timeout=5).json()
+			res = requests.post(
+					url=url,
+					data=flask.json.dumps({"sender": "Rasa", "message": text}),
+					timeout=5).json()
 		except:
 			# mimic the rasa response when something wrong happens
 			res = [{'recipient_id': 'Rasa',

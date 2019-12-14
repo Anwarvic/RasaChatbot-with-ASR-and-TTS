@@ -1,7 +1,7 @@
 import torch
 import sys
 import yaml
-from scipy.io import wavfile
+import numpy as np
 
 from g2p_en import G2p
 from argparse import Namespace
@@ -109,7 +109,9 @@ class TTS():
             y = self.vocoder(z, c).view(-1)
         wav = y.view(-1).cpu().numpy()
         #TODO: don't write and return the numpy.array
-        wavfile.write(filename, self.vocoder_config["sampling_rate"], wav)
-        # return wav
+        # wav = wav * np.iinfo(np.int32).max
+        # wav = wav.astype("np.int32")
+
+        return wav, self.vocoder_config["sampling_rate"]
 
 

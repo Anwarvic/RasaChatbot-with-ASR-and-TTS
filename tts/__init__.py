@@ -1,7 +1,6 @@
-import torch
 import sys
 import yaml
-import numpy as np
+import torch
 
 from g2p_en import G2p
 from argparse import Namespace
@@ -96,7 +95,7 @@ class TTS():
             return torch.LongTensor(idseq).view(-1).to(self.device)
 
 
-    def synthesize(self, input_text, filename):
+    def synthesize(self, input_text):
         with torch.no_grad():
             x = self.__frontend(input_text)
             inference_args = Namespace(**{"threshold": 0.5,
@@ -108,10 +107,6 @@ class TTS():
                 self.vocoder_config["generator_params"]["aux_context_window"])(c.unsqueeze(0).transpose(2, 1))
             y = self.vocoder(z, c).view(-1)
         wav = y.view(-1).cpu().numpy()
-        #TODO: don't write and return the numpy.array
-        # wav = wav * np.iinfo(np.int32).max
-        # wav = wav.astype("np.int32")
-
         return wav, self.vocoder_config["sampling_rate"]
 
 

@@ -25,7 +25,8 @@ def index():
 @app.route('/send_message', methods=['POST'])
 def call_chatbot():
 	"""
-	This function does the following:
+	This function is called using a POST request and this function does the
+	following:
 	- sends the given data to Rasa server running in the background
 	- parse the server response, get the content.
 	- if the tts is enabled, passes the text to the TTS
@@ -98,7 +99,6 @@ def call_chatbot():
 			toc = time.time()
 			print( "TTS Duration: {} seconds".format(toc-tic) )
 		
-		
 		result.append(d)
 
 	# get back the result
@@ -111,6 +111,16 @@ def call_chatbot():
 
 @app.route('/send_audio_msg', methods=['POST'])
 def call_asr():
+	"""
+	This function is called using a POST request passing base64 string of webm 
+	audio encoded using opus codecs. And this function parses this string and
+	extract the audio to be transcribed using the ASR model. After that, the
+	data is being sent back to the frontend as a JSON object like the following:
+	{"text": str}
+	NOTE:
+	if the audio is silent or the ASR couldn't transcribe, then an empty string 
+	is sent instead.
+	"""
 	tic = time.time()
 	req = flask.request.data.decode("utf-8")
 	header, *bytes_stream = req.split(',')

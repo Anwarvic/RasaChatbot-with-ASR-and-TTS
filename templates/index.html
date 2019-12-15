@@ -79,7 +79,9 @@
 								<span>{a msg.body a}</span>
 							</div>
 							<div ng-if=" msg.type== 'image' ">
-								<img src="{a msg.body a}" style="width: 400px;">
+								<a href="{a msg.body a}" target="_blank">
+									<img src="{a msg.body a}" style="width: 400px;">
+								</a>
 							</div>
 							<span class="msg_time">{a msg.time a}</span>
 						</div>

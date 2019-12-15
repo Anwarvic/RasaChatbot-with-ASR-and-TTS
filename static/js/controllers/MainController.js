@@ -171,7 +171,6 @@ function($scope, $http) {
 				let audioEnd = Date.now();
 				let blob = new Blob(chunks, {'type':'audio/webm; codecs=opus'});
 				let encodedBlob = await $scope.b2text(blob);
-				console.log(encodedBlob);
 				let url = URL.createObjectURL(blob);
 				// send post request to flask backend
 				$http.post('/send_audio_msg', encodedBlob)

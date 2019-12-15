@@ -1,4 +1,5 @@
 import os
+import time
 import flask
 import requests
 import librosa
@@ -77,6 +78,7 @@ def call_chatbot():
 		d["type"] =  "text" if "text" in item.keys() else "image"
 		d["body"] = item[d["type"]]
 		if use_tts and d["type"] == "text":
+			tic = time.time()
 			wav, sr = tts_model.synthesize(d["body"])
 			# convert wav from float32 to int16
 			wav = (wav * np.iinfo(np.int16).max).astype(np.int16)
@@ -93,6 +95,8 @@ def call_chatbot():
 			processed_string = bytes_stream.decode("utf-8")
 			# pass the string
 			d["snd"] = processed_string
+			toc = time.time()
+			print( "TTS Duration: {} seconds".format(toc-tic) )
 		
 		
 		result.append(d)
@@ -107,6 +111,7 @@ def call_chatbot():
 
 @app.route('/send_audio_msg', methods=['POST'])
 def call_asr():
+	tic = time.time()
 	req = flask.request.data.decode("utf-8")
 	header, *bytes_stream = req.split(',')
 	if bytes_stream:
@@ -122,6 +127,8 @@ def call_asr():
 		data = librosa.core.resample(data, 48000, 16000)
 		# transcribe the provided data
 		out = asr_model.transcribe(data)
+		toc = time.time()
+		print( "ASR Duration: {} seconds".format(toc-tic) )
 	else:
 		out = " "
 	# form response

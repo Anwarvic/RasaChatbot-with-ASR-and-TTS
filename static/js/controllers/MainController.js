@@ -65,9 +65,9 @@ function($scope, $http) {
 									"time": $scope.getTime(),
 									"type": element["type"],
 									"body": element["body"]};
-					if (element["path"]){
+					if (element["snd"]){
 						// wait for TTS
-						let promise = $scope.TTSplay(element["path"]);
+						let promise = $scope.TTSplay(element["snd"]);
 						promise.then(function(snd){
 							snd.play();
 						});
@@ -171,6 +171,7 @@ function($scope, $http) {
 				let audioEnd = Date.now();
 				let blob = new Blob(chunks, {'type':'audio/webm; codecs=opus'});
 				let encodedBlob = await $scope.b2text(blob);
+				console.log(encodedBlob);
 				let url = URL.createObjectURL(blob);
 				// send post request to flask backend
 				$http.post('/send_audio_msg', encodedBlob)
@@ -249,16 +250,15 @@ function($scope, $http) {
 	};
 
 	// play audio returned from TTS
-	$scope.TTSplay = async function(path){
-		console.log(path);
-		let snd = new Audio(path);
+	$scope.TTSplay = async function(b64buff){
+		let snd = new Audio("data:audio/wav;base64," + b64buff);
 		// fires when TTS audio is playing
 		snd.onplaying = function(){
-			console.log("tts playing "+path);
+			console.log("TTS Playing!");
 		};
 		// fires when TTS audio ends
 		snd.onended = function(){
-			console.log("tts ended "+path);
+			console.log("TTS Ended!");
 		};
 		return snd;
 	};

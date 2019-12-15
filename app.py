@@ -4,6 +4,7 @@ import requests
 import librosa
 import numpy as np
 from io import BytesIO
+from scipy.io import wavfile 
 from pydub import AudioSegment
 from base64 import b64encode, b64decode
 
@@ -11,8 +12,9 @@ from asr import ASR
 from tts import TTS
 from utils import parse_yaml
 
-app = flask.Flask(__name__)
 
+
+app = flask.Flask(__name__)
 
 @app.route('/')
 def index():
@@ -39,10 +41,13 @@ def call_chatbot():
 
 	Returns:
 		the returned object is on the following structure:
-		[{ "id": int, "type": "text"/"image", "body": str, "path": str (optional) },
-		 { "id": int, "type": "text"/"image", "body": str, "path": str (optional) },
+		[{ "id": int, "type": "image", "body": str},
+		 { "id": int, "type": "text", "body": str, "snd": str },
 		 ...
 		]
+	
+	NOTE:
+		"snd" key is passed only if TTS is enabled and the message type is text
 	"""
 	# prase the given data
 	data = flask.json.loads(flask.request.data.decode('utf-8'))
@@ -62,7 +67,7 @@ def call_chatbot():
 		except:
 			# mimic the rasa response when something wrong happens
 			res = [{'recipient_id': 'Rasa',
-					'text': "[Something went wrong]"}]
+					'text': "[SOMETHING WENT WRONG!!]"}]
 		if res: break
 	print(res)
 	for item in res:
@@ -71,20 +76,32 @@ def call_chatbot():
 		d["id"] = current_id
 		d["type"] =  "text" if "text" in item.keys() else "image"
 		d["body"] = item[d["type"]]
-		if use_tts and "text" in item.keys():
-			wavfilename = "static/{}.wav".format(current_id)
-			if os.path.exists(wavfilename):
-				os.remove(wavfilename)
-			tts_model.synthesize(d["body"], wavfilename)
-			d["path"] = wavfilename
+		if use_tts and d["type"] == "text":
+			wav, sr = tts_model.synthesize(d["body"])
+			# convert wav from float32 to int16
+			wav = (wav * np.iinfo(np.int16).max).astype(np.int16)
+			# write the wav into temporary file
+			wavfile.write(".tmp.wav", sr, wav)
+			# read the bytes
+			with open(".tmp.wav", "rb") as fin:
+				wav = fin.read()
+			# remove tmp file
+			os.remove(".tmp.wav")
+			# convert it to base64 bytes
+			bytes_stream = b64encode(wav)
+			# decode bytes into string to be JSON serializable
+			processed_string = bytes_stream.decode("utf-8")
+			# pass the string
+			d["snd"] = processed_string
+		
+		
 		result.append(d)
-	print(result)
+
 	# get back the result
 	flask_response = app.response_class(response=flask.json.dumps(result),
 										status=200,
 										mimetype='application/json' )
 	return flask_response
-	# return flask.jsonify(success=True)
 
 
 

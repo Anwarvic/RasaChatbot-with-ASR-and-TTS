@@ -23,16 +23,17 @@ class ASR():
         if conf["decoder"] == "beam":
             from .decoder import BeamCTCDecoder
             self.decoder = BeamCTCDecoder(self.model.labels,
-                                    lm_path=config["lm_path"],
-                                    alpha=config["alpha"], beta=config["beta"],
-                                    cutoff_top_n=config["cutoff_top_n"],
-                                    cutoff_prob=config["cutoff_prob"],
-                                    beam_width=config["beam_width"],
-                                    num_processes=config["lm_workers"])
+                                    lm_path = self.conf["lm_path"],
+                                    alpha = self.conf["alpha"],
+                                    beta = self.conf["beta"],
+                                    cutoff_top_n = self.conf["cutoff_top_n"],
+                                    cutoff_prob = self.conf["cutoff_prob"],
+                                    beam_width = self.conf["beam_width"],
+                                    num_processes = self.conf["lm_workers"])
         elif conf["decoder"] == "greedy":
             from .decoder import GreedyDecoder
             self.decoder = GreedyDecoder(self.model.labels,
-                                        blank_index=self.model.labels.index('_'))
+                                    blank_index=self.model.labels.index('_'))
 
 
     def transcribe(self, audio):

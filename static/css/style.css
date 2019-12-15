@@ -4,7 +4,12 @@ body,html{
 	background: #7F7FD5;
 	/*background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
 	background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);*/
-	overflow: hidden;
+	overflow: scroll;
+    overflow-x: hidden;
+}
+::-webkit-scrollbar {
+    width: 0px;  /* Remove scrollbar space */
+    background: transparent;  /* Optional: just make scrollbar invisible */
 }
 
 a{
@@ -29,8 +34,8 @@ a{
 .msg_card_body{
 	width: 100%;
     height: 100%;
-    overflow-y: scroll;
-    box-sizing: content-box; 
+	overflow-y: scroll;
+	box-sizing: content-box; 
 }
 
 .card-header{

@@ -12,7 +12,8 @@ class ASR():
     def __init__(self, conf):
         self.conf = conf
         # load pre-trained model
-        self.model = DeepSpeech.load_model(self.conf["model_path"])
+        model_path = os.path.join(os.getcwd(), self.conf["model_path"])
+        self.model = DeepSpeech.load_model(model_path)
         self.model.eval()
         self.device = torch.device("cuda" if conf["cuda"] else "cpu")
         self.model = self.model.to(self.device)
@@ -22,8 +23,9 @@ class ASR():
         # create decoder
         if conf["decoder"] == "beam":
             from .decoder import BeamCTCDecoder
+            lm_path = os.path.join(os.getcwd(), self.conf["lm_path"])
             self.decoder = BeamCTCDecoder(self.model.labels,
-                                    lm_path = self.conf["lm_path"],
+                                    lm_path = lm_path,
                                     alpha = self.conf["alpha"],
                                     beta = self.conf["beta"],
                                     cutoff_top_n = self.conf["cutoff_top_n"],

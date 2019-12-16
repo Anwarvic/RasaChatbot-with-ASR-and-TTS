@@ -4,11 +4,11 @@ asr:
   cuda: False
   # either 'greedy' or 'beam'... use 'beam' when you have a language model
   decoder: 'greedy'
-  # absolute path to the trained ASR model
-  model_path: '/media/anwar/E/Chatbot/Rasa/asr/models/librispeech/librispeech_pretrained_v2.pth'
+  # relative path to the trained ASR model
+  model_path: 'asr/models/librispeech/librispeech_pretrained_v2.pth'
 
   ##### IN CASE OF 'beam' DECODING #####
-  lm_path: None
+  lm_path: "asr/models/en-70k-0.2-pruned.lm"
   beam_width: 10
   alpha: 0.8
   beta: 1

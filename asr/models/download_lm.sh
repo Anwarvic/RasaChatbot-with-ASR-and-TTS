@@ -13,6 +13,6 @@ then
 	gunzip "en-70k-0.2-pruned.lm.gz"
 	echo "Sucessfully extracted language model"
 else
-	echo "Language Model is found!!"
+	echo "Language Model is already found!!"
 fi
 

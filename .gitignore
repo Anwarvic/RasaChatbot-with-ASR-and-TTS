@@ -18,13 +18,15 @@ py3env
 rasa
 
 # asr
+ctcdecode
+en-70k-0.2-pruned.lm
+an4_pretrained_v2.pth
 ted_pretrained_v2.pth
 librispeech_pretrained_v2.pth
-ctcdecode
 
 # tts
 espnet
-fastspeech
 tacotron2
+fastspeech
 transformer
 ljspeech.parallel_wavegan.v1

@@ -1,7 +1,7 @@
 
 
-app.controller('MainController', ['$scope', '$http',
-function($scope, $http) {
+app.controller('MainController', ['$scope', '$http', '$timeout',
+function($scope, $http, $timeout) {
 	//////////////////// HTML click functions ////////////////////
 	// control app configulration
 	$scope.config = {
@@ -22,7 +22,9 @@ function($scope, $http) {
 	// basic datatype for the session conversation
 	$scope.conversation = [];
 	// variable to control sending
-    $scope.enableSending = true;
+	$scope.enableSending = true;
+	// duration of holding before recording
+	$scope.holdDuration = 1000;
 
 	//////////////////// helper functions ////////////////////
 	// function to get the current time
@@ -215,18 +217,18 @@ function($scope, $http) {
 		console.log("record btn is clicked");
 		$scope.stop();
 		//hold for 1s to start recording
-		$scope.holdCounter = setTimeout(function(){
+		$scope.holdCounter = $timeout(function(){
 			// play trigger
 			let snd = new Audio("/static/audio/tone.wav");
 			snd.play();
-			setTimeout(function (){
+			$timeout(function (){
 				$scope.startRecording();
 			}, 500); //500 is the duration of tone.wav
 			// onended DIDN'T WORK, DON'T KNOW WHY!!
 			// snd.onended = function(){
 			// 	$scope.startRecording();
 			// };
-		}, 1000);
+		}, $scope.holdDuration);
 	};
 
 	// play audio file

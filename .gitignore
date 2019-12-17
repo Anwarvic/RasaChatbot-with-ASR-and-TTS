@@ -19,9 +19,9 @@ rasa
 
 # asr
 ctcdecode
-en-70k-0.2-pruned.lm
 an4_pretrained_v2.pth
 ted_pretrained_v2.pth
+3-gram.pruned.1e-7.arpa
 librispeech_pretrained_v2.pth
 
 # tts

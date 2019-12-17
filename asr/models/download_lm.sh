@@ -1,16 +1,16 @@
 #!/bin/bash
 
-if [[ ! -f "en-70k-0.2-pruned.lm" && ! -f "en-70k-0.2-pruned.lm.gz" ]]
+if [[ ! -f "3-gram.pruned.1e-7.arpa" && ! -f "3-gram.pruned.1e-7.arpa.gz" ]]
 then
 	# download language model (pruned 70k words)
-	wget "https://liquidtelecom.dl.sourceforge.net/project/cmusphinx/Acoustic%20and%20Language%20Models/US%20English/en-70k-0.2-pruned.lm.gz"
+	wget "http://www.openslr.org/resources/11/3-gram.pruned.1e-7.arpa.gz"
 	echo "Sucessfully downloaded language model"
 fi
 
-if [ ! -f "en-70k-0.2-pruned.lm" ]
+if [ ! -f "3-gram.pruned.1e-7.arpa.gz" ]
 then
 	# uncompress it in the current directory
-	gunzip "en-70k-0.2-pruned.lm.gz"
+	gunzip "3-gram.pruned.1e-7.arpa.gz"
 	echo "Sucessfully extracted language model"
 else
 	echo "Language Model is already found!!"

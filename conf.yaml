@@ -8,7 +8,7 @@ asr:
   model_path: 'asr/models/librispeech_pretrained_v2.pth'
 
   ##### IN CASE OF 'beam' DECODING #####
-  lm_path: "asr/models/en-70k-0.2-pruned.lm"
+  lm_path: "asr/models/3-gram.pruned.1e-7.arpa"
   beam_width: 10
   alpha: 0.8
   beta: 1

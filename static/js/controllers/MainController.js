@@ -158,27 +158,32 @@ function($scope, $http, $timeout) {
 				$scope.audioCntxt = new AudioContext();
 				var source = $scope.audioCntxt.createMediaStreamSource(stream);
 				var processor = $scope.audioCntxt.createScriptProcessor(1024, 1, 1);
+				// resampler object (16000 is what ASR expects)
+				let res = new Resampler($scope.audioCntxt.sampleRate, 16000, 1, 1024);
 				var chunks = [];
 
 				source.connect(processor);
 				processor.connect($scope.audioCntxt.destination);
 
 				// NOTE: this function is running all the time
-				processor.onaudioprocess = function(e) {
+				processor.onaudioprocess = async function(e) {
 					// this is
 					if($scope.startRecording){
-						chunks.push.apply(chunks, e.inputBuffer.getChannelData(0));
+						const inBuf = e.inputBuffer.getChannelData(0);
+						const outBuf = res.resample(inBuf);
+						chunks.push.apply(chunks, outBuf);
 						if ($scope.stopRecording) {
 							$scope.audioCntxt.close();
-							// Convert this to WAV
-							var wav = new synth.WAV(1, $scope.audioCntxt.sampleRate, 16, true, chunks);
-							let audioDuration = data.length / $scope.audioCntxt.sampleRate;
-							console.log(wav);
-							var blob = wav.toBlob();
+							// Convert buffer to WAV (sample rate: 16k, percision: 16-bit)
+							let wav = new synth.WAV(1, 16000, 16, true, chunks);
+							let audioDuration = chunks.length / 16000;
+							let blob = wav.toBlob();
 							// do something with blob
-							var url = URL.createObjectURL(blob);
+							let url = URL.createObjectURL(blob);
+							// encode blob to base64 text
+							let encodedBlob = await $scope.b2text(blob);
 							// send post request to flask backend
-							$http.post('/send_audio_msg', wav)
+							$http.post('/send_audio_msg', encodedBlob)
 							.then(function(response) {
 								// success
 								var userAudioMsg = {

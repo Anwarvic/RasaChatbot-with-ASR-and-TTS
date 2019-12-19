@@ -124,29 +124,23 @@ def call_asr():
 	tic = time.time()
 	req = flask.request.data.decode("utf-8")
 	header, *bytes_stream = req.split(',')
-	if bytes_stream:
-		bytes_stream = b64decode(bytes_stream[0])
-		audio = AudioSegment.from_file(BytesIO(bytes_stream))
-		# convert it to numpy
-		data = np.frombuffer(audio._data, dtype=np.int32)
-		# change type to np.int16 by dropping bottom 16 bits
-		data = (data>>16).astype(np.int16)
-		# change type to np.float32
-		data = data.astype('float32') / np.iinfo(np.int16).max  # normalize audio
-		# change sample rate from 48000 to 16000
-		data = librosa.core.resample(data, 48000, 16000)
-		# transcribe the provided data
-		out = asr_model.transcribe(data)
-		toc = time.time()
-		print( "ASR Duration: {} seconds".format(toc-tic) )
-	else:
-		out = " "
+	wav = b64decode(bytes_stream[0])
+	# write the wav into temporary file
+	with open(".tmp.wav", "wb") as fout:
+		fout.write(wav)
+	sr, wav = wavfile.read(".tmp.wav")
+	os.remove(".tmp.wav")
+	# normalize audio & convert it to np.float32
+	wav = wav.astype(np.float32) / 32767
+	# transcribe the provided data
+	out = asr_model.transcribe(wav)
+	toc = time.time()
+	print( "ASR Duration: {} seconds".format(toc-tic) )
 	# form response
 	flask_response = app.response_class(response=flask.json.dumps({"text": out}),
 										status=200,
 										mimetype='application/json' )
 	return flask_response
-	
 
 
 

@@ -4,14 +4,13 @@ import flask
 import requests
 import librosa
 import numpy as np
-from io import BytesIO
 from scipy.io import wavfile 
-from pydub import AudioSegment
 from base64 import b64encode, b64decode
 
 from asr import ASR
 from tts import TTS
 from utils import parse_yaml
+
 
 
 
@@ -130,8 +129,13 @@ def call_asr():
 		fout.write(wav)
 	sr, wav = wavfile.read(".tmp.wav")
 	os.remove(".tmp.wav")
-	# normalize audio & convert it to np.float32
-	wav = wav.astype(np.float32) / 32767
+	# copying is essential for re-scaling
+	wav = np.copy(wav)
+	# re=scale the audio
+	max_amp = np.max(np.abs(wav))
+	wav *= np.iinfo(np.int16).max // max_amp
+	# convert it to np.float32
+	wav = wav.astype(np.float32) / np.iinfo(np.int16).max
 	# transcribe the provided data
 	out = asr_model.transcribe(wav)
 	toc = time.time()

@@ -25,6 +25,9 @@ function($scope, $http, $timeout) {
 	$scope.enableSending = true;
 	// duration of holding before recording
 	$scope.holdDuration = 1000;
+	// flags to be changed when record/stop events are fired
+	$scope.startRecording = false;
+	$scope.stopRecording = false;
 
 	//////////////////// helper functions ////////////////////
 	// function to get the current time
@@ -42,7 +45,7 @@ function($scope, $http, $timeout) {
 		reader.onloadend = e => resolve(e.srcElement.result);
 		reader.readAsDataURL(blob);
 	});
-
+	
 	//////////////////// Main functions ////////////////////
 	// function to view user message
 	$scope.presentUserMessage = function(userMsg){
@@ -150,8 +153,58 @@ function($scope, $http, $timeout) {
 			$scope.haveMicPermission = true;
 			console.log("Getting Permission");
 			return new Promise(async resolve => {
-				stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-				$scope.recorder = new MediaRecorder(stream)
+				let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+				$scope.audioCntxt = new AudioContext();
+				var source = $scope.audioCntxt.createMediaStreamSource(stream);
+				var processor = $scope.audioCntxt.createScriptProcessor(1024, 1, 1);
+				var data = [];
+
+				source.connect(processor);
+				processor.connect($scope.audioCntxt.destination);
+
+				processor.onaudioprocess = function(e) {
+					if($scope.startRecording){
+						
+						data.push.apply(data, e.inputBuffer.getChannelData(0));
+						if ($scope.stopRecording) {
+							$scope.audioCntxt.close();
+							let audioEnd = Date.now();
+							var track = stream.getAudioTracks()[0];
+							track.stop();
+							// Convert this to WAV
+							var wav = new synth.WAV(1, $scope.audioCntxt.sampleRate, 16, true, data);
+							let audioDuration = data.length / $scope.audioCntxt.sampleRate;
+							console.log(wav);
+							var blob = wav.toBlob();
+							// do something with blob
+							var url = URL.createObjectURL(blob);
+							// send post request to flask backend
+							$http.post('/send_audio_msg', wav)
+							.then(function(response) {
+								// success
+								var userAudioMsg = {
+									"id": $scope.conversation.length,
+									"sender": "user",
+									"time": $scope.getTime(),
+									"body": {
+										"snd": url,
+										"text":response["data"]["text"],
+										"duration": audioDuration
+									},
+									"type": "audio"};
+								// send message to Rasa server
+								$scope.userMsg = userAudioMsg["body"]["text"];
+								$scope.sendMessage(userAudioMsg);
+
+							},
+							function(response) { 
+								// failed
+								console.log(response);
+							});
+							$scope.startRecording = false;
+						}
+					}
+				};
 			});
 		}
 	};
@@ -159,55 +212,36 @@ function($scope, $http, $timeout) {
 	// counter to track holding period
 	$scope.holdCounter = 0;
 	// record function for the ASR
-	$scope.startRecording = function(){
-		return new Promise(async resolve => {
-			$scope.recorder.start();
-			console.log("START RECORDING");
-			let chunks = [];
-			$scope.recorder.ondataavailable = function(e){
-				chunks.push(e.data);
-			}
+	// $scope.startRecording = function(){
+	// 	return new Promise(async resolve => {
+	// 		$scope.recorder.start();
+	// 		console.log("START RECORDING");
+	// 		let chunks = [];
+	// 		$scope.recorder.ondataavailable = function(e){
+	// 			chunks.push(e.data);
+	// 		}
 			
-			let audioStart = Date.now();
-			$scope.recorder.onstop = async ()=>{
-				let audioEnd = Date.now();
-				let blob = new Blob(chunks, {'type':'audio/webm; codecs=opus'});
-				let encodedBlob = await $scope.b2text(blob);
-				let url = URL.createObjectURL(blob);
-				// send post request to flask backend
-				$http.post('/send_audio_msg', encodedBlob)
-				.then(function(response) {
-					// success
-					var userAudioMsg = {
-						"id": $scope.conversation.length,
-						"sender": "user",
-						"time": $scope.getTime(),
-						"body": {
-							"snd": url,
-							"text":response["data"]["text"],
-							"duration": (audioEnd-audioStart)/1000
-						},
-						"type": "audio"};
-					// send message to Rasa server
-					$scope.userMsg = userAudioMsg["body"]["text"];
-					$scope.sendMessage(userAudioMsg);
-
-				},
-				function(response) { 
-					// failed
-					console.log(response);
-				});
-			}
-		});
-	};
+	
+	// 		$scope.recorder.onstop = async ()=>{
+	
+	// 			// Convert this to WAV
+	// 			// let wav = new synth.WAV(1, 44100, 16, true, chunks);
+	// 			// let blob = wav.toBlob();
+	// 			let blob = new Blob(chunks, {'type':'audio/webm; codecs=opus'});
+	// 			let encodedBlob = await $scope.b2text(blob);
+	// 			let url = URL.createObjectURL(blob);
+				
+	// 		}
+	// 	});
+	// };
 
 	// stop recording function for the ASR
 	$scope.stop = function(){
 		if ($scope.holdCounter){
 			console.log("Recording stopped!!");
 			clearTimeout($scope.holdCounter);
-			if ($scope.recorder && $scope.recorder.state == "recording"){
-				$scope.recorder.stop();
+			if ($scope.audioCntxt.state == "running"){
+				$scope.stopRecording = true;
 				console.log("STOPPED");
 			}
 		}
@@ -215,14 +249,16 @@ function($scope, $http, $timeout) {
 
 	$scope.record = function(){
 		console.log("record btn is clicked");
-		$scope.stop();
+		// $scope.stop();
 		//hold for 1s to start recording
 		$scope.holdCounter = $timeout(function(){
 			// play trigger
 			let snd = new Audio("/static/audio/tone.wav");
 			snd.play();
 			$timeout(function (){
-				$scope.startRecording();
+				console.log("START RECORDING");
+				$scope.startRecording = true;
+				$scope.stopRecording = false;
 			}, 500); //500 is the duration of tone.wav
 			// onended DIDN'T WORK, DON'T KNOW WHY!!
 			// snd.onended = function(){

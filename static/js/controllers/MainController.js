@@ -61,8 +61,24 @@ function($scope, $http, $timeout) {
 	// function to view Rasa response
 	$scope.presentRasaResponse = function(obj){
 		return new Promise((resolve, reject) =>{
+			// prepare loading message
+			let loadingMsg = { "id": $scope.conversation.length,
+								"sender": "bot",
+								"time": "",
+								"type": "text",
+								"body": ""};
+			$scope.conversation.push(loadingMsg);
+			// adding loading style
+			$timeout(function(){
+				document.getElementById("msg#"+loadingMsg["id"]).classList.add("loading")
+			}, 10);
+			// call backend
 			$http.post('/send_message', obj)
 			.then(function(response) {
+				// remove loading message
+				document.getElementById("msg#"+loadingMsg["id"]).classList.remove("loading");
+				$scope.conversation.pop();
+				// iterate over Rasa's messages
 				response['data'].forEach(async function(element) {
 					// formulate bot response
 					var rasaMsg = { "id": $scope.conversation.length,

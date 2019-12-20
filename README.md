@@ -4,9 +4,7 @@ This repository contains an attempt to incorporate Rasa Chatbot with state-of-th
 
 ## Browser compatibility
 
-In this project, the browser is a big part as it provides access to the connected media input devices like micrsphones. So, I had to use a supported interface that is compatible with all mainstream browsers even with older versions. That's why I used the `navigator.mediaDevices` interface with `ogg` audio format encoded by `opus` codec.
-
-I didn't use other interfaces like `MediaRecorder` because it isn't compatible with Microsoft Edge, or Internet Explorer (IE) or Safari. I didn't use any other plugins like `recorderJs` either as it isn't supported anymore.
+In this project, the browser is a big part as it provides access to the connected media input devices like microphones. So, I had to use a supported interface that is compatible with all mainstream browsers even with older versions. That's why I used the `AudioContext()` interface. I didn't use other interfaces like `MediaRecorder` because it isn't compatible with Microsoft Edge, or Safari. Also, I didn't use any other plugins like `recorderJs` as it is not supported anymore.
 
 Here is a table of the least acceptable version of each mainstream browser out there in the market:
 
@@ -49,3 +47,13 @@ Here is a table of the least acceptable version of each mainstream browser out t
     </tbody>
 </table>
 
+
+
+# Special Thanks
+
+Special Thanks to:
+
+- Sean Naren for training the provided ASR model.
+- ESPNet organization for training all provided TTS models.
+- SamimOnline for providing the early [Bootstrap template](https://bootsnipp.com/snippets/nNg98)
+- Patrick Roberts for the [synth-js](https://github.com/patrickroberts/synth-js) JavaScript plugin.

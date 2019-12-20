@@ -31,18 +31,18 @@ Here is a table of the least acceptable version of each mainstream browser out t
     </thead>
     <tbody>
         <tr>
-            <td>Full support 52 </td>
-            <td>Full support 12</td>
-            <td>Full support 36</td>
-            <td>No support</td>
-            <td>Full support 40</td>
-            <td>Full support 11</td>
-            <td>Full support 53</td>
-            <td>Full support 52</td>
-            <td>Full support 36</td>
-            <td>Full support 41</td>
-            <td>Full support 11</td>
-            <td>Full support</td>
+            <td>:heavy_check_mark: Full support 35 </td>
+            <td>:heavy_check_mark: Full support</td>
+            <td>:heavy_check_mark: Full support 25</td>
+            <td>:x: No support</td>
+            <td>:heavy_check_mark: Full support 22</td>
+            <td>:heavy_check_mark: Full support 6</td>
+            <td>:heavy_check_mark: Full support</td>
+            <td>:heavy_check_mark: Full support 35</td>
+            <td>:heavy_check_mark: Full support 26</td>
+            <td>:heavy_check_mark: Full support 22</td>
+            <td>:heavy_check_mark: Full support</td>
+            <td>:heavy_check_mark: Full support</td>
         </tr>
     </tbody>
 </table>

@@ -63,21 +63,21 @@ function($scope, $http, $timeout) {
 	$scope.presentRasaResponse = function(obj){
 		return new Promise((resolve, reject) =>{
 			// prepare loading message
-			let loadingMsg = { "id": $scope.conversation.length,
+			let botLoadingMsg = { "id": $scope.conversation.length,
 								"sender": "bot",
 								"time": "",
 								"type": "text",
 								"body": ""};
-			$scope.conversation.push(loadingMsg);
+			$scope.conversation.push(botLoadingMsg);
 			// adding loading style
 			$timeout(function(){
-				document.getElementById("msg#"+loadingMsg["id"]).classList.add("loading")
+				document.getElementById("msg#"+botLoadingMsg["id"]).classList.add("loading")
 			}, 10);
 			// call backend
 			$http.post('/send_message', obj)
 			.then(function(response) {
 				// remove loading message
-				document.getElementById("msg#"+loadingMsg["id"]).classList.remove("loading");
+				document.getElementById("msg#"+botLoadingMsg["id"]).classList.remove("loading");
 				$scope.conversation.pop();
 				// iterate over Rasa's messages
 				response['data'].forEach(async function(element) {
@@ -108,9 +108,12 @@ function($scope, $http, $timeout) {
 		});
 	};
 
-	// function to 
+	// function to send text message
 	$scope.submitMessage = function(){
 		if ($scope.userMsg && $scope.enableSending){
+			// disable sending
+			$scope.enableSending = false;
+			// structure the text message
 			let userTextMsg = {
 				"id": $scope.conversation.length,
 				"sender": "user",
@@ -118,15 +121,13 @@ function($scope, $http, $timeout) {
 				"time": $scope.getTime(),
 				"type": "text"
 			};
-			// send message to Rasa server
+			// send text message to Rasa server
 			$scope.sendMessage(userTextMsg);
 		}
 	}
 	
 	// function to send user messages to the bot
 	$scope.sendMessage = async function(userMsg){
-		// disable sending
-		$scope.enableSending = false;
 		// variable to match the ASR flag
 		let asrEnabled = $scope.config.asr;
 		// deactivate ASR temporarily
@@ -229,6 +230,8 @@ function($scope, $http, $timeout) {
 		console.log("Recording stopped!!");	
 		clearTimeout($scope.holdCounter);
 		if ($scope.chunks.length != 0 && $scope.microphone && $scope.recorder){
+			// disable sending
+			$scope.enableSending = false;
 			// disconnect audio devices
 			$scope.microphone.disconnect();
 			$scope.recorder.disconnect();
@@ -239,6 +242,18 @@ function($scope, $http, $timeout) {
 			userHeadline.textContent = "Chat with User";
 			userHeadline.style.removeProperty("color");
 			userHeadline.classList.remove("loading");
+			// send loading message
+			let userLoadingMsg = { "id": $scope.conversation.length,
+								"sender": "user",
+								"time": "",
+								"type": "text",
+								"body": ""
+			};
+			$scope.conversation.push(userLoadingMsg);
+			// adding loading style
+			$timeout(function(){
+				document.getElementById("msg#"+userLoadingMsg["id"]).classList.add("loading")
+			}, 1);
 			// Convert buffer to WAV (sample rate: 16k, percision: 16-bit)
 			let wav = new synth.WAV(1, 16000, 16, true, $scope.chunks);
 			// get audio duration
@@ -255,6 +270,10 @@ function($scope, $http, $timeout) {
 			$http.post('/send_audio_msg', encodedBlob)
 			.then(function(response) {
 				// success
+				// remove loading message
+				document.getElementById("msg#"+userLoadingMsg["id"]).classList.remove("loading");
+				$scope.conversation.pop();
+				// structure audio message
 				let userAudioMsg = {
 					"id": $scope.conversation.length,
 					"sender": "user",
@@ -268,6 +287,7 @@ function($scope, $http, $timeout) {
 				};
 				// send message to Rasa server
 				$scope.userMsg = userAudioMsg["body"]["text"];
+				// send audio message
 				$scope.sendMessage(userAudioMsg);
 			},
 			function(response) { 

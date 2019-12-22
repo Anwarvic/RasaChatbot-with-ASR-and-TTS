@@ -25,6 +25,9 @@ function($scope, $http, $timeout) {
 	$scope.enableSending = true;
 	// duration of holding before recording
 	$scope.holdDuration = 1000;
+	// variable to track the condition of the mic button
+	$scope.micDown = false;
+
 
 	//////////////////// helper functions ////////////////////
 	// function to get the current time
@@ -188,70 +191,69 @@ function($scope, $http, $timeout) {
 		}
 	};
 	
-	// counter to track the holding period
-	$scope.holdCounter = 0;
 	// record function for the ASR
 	$scope.record = function(){
 		console.log("record btn is clicked");
 		//hold for a certain period to start recording
 		$scope.holdCounter = setTimeout(function(){
+			$scope.micDown = true;
 			// play trigger
 			let snd = new Audio("/static/audio/tone.wav");
 			snd.play();
 			snd.onended = function(){
-				console.log("START RECORDING");
-				$scope.microphone.connect($scope.recorder);
-				$scope.recorder.connect($scope.audioCntxt.destination);
+				// check mic button being still clicked upon
+				if ($scope.micDown){
+					console.log("Recording started!!");
+					$scope.microphone.connect($scope.recorder);
+					$scope.recorder.connect($scope.audioCntxt.destination);
+				}
 			};
 		}, $scope.holdDuration);
 	};
 
 	// stop recording function for the ASR
 	$scope.stop = async function(){
-		if ($scope.holdCounter){
-			console.log("ANWAR: "+$scope.holdCounter); //TODO: delete
-			console.log("Recording stopped!!");	
-			clearTimeout($scope.holdCounter);
-			console.log("ANWAR: "+$scope.holdCounter); //TODO: delete
-			if ($scope.chunks.length != 0 && $scope.microphone && $scope.recorder){
-				$scope.microphone.disconnect();
-          		$scope.recorder.disconnect();
-				// Convert buffer to WAV (sample rate: 16k, percision: 16-bit)
-				let wav = new synth.WAV(1, 16000, 16, true, $scope.chunks);
-				// get audio duration
-				let audioDuration = $scope.chunks.length / 16000;
-				// reset recorded audio data
-				$scope.chunks = [];
-				// convert wav to blob
-				let blob = wav.toBlob();
-				// get url to be saved in the conversation
-				let url = URL.createObjectURL(blob);
-				// encode blob to base64 text to be sent to backend
-				let encodedBlob = await $scope.b2text(blob);
-				// send post request to flask backend
-				$http.post('/send_audio_msg', encodedBlob)
-				.then(function(response) {
-					// success
-					let userAudioMsg = {
-						"id": $scope.conversation.length,
-						"sender": "user",
-						"time": $scope.getTime(),
-						"body": {
-							"snd": url,
-							"text":response["data"]["text"],
-							"duration": audioDuration
-						},
-						"type": "audio"
-					};
-					// send message to Rasa server
-					$scope.userMsg = userAudioMsg["body"]["text"];
-					$scope.sendMessage(userAudioMsg);
-				},
-				function(response) { 
-					// failed
-					console.log(response);
-				});
-			}
+		$scope.micDown = false;
+		console.log("Recording stopped!!");	
+		clearTimeout($scope.holdCounter);
+		if ($scope.chunks.length != 0 && $scope.microphone && $scope.recorder){
+			$scope.microphone.disconnect();
+			$scope.recorder.disconnect();
+			// Convert buffer to WAV (sample rate: 16k, percision: 16-bit)
+			let wav = new synth.WAV(1, 16000, 16, true, $scope.chunks);
+			// get audio duration
+			let audioDuration = $scope.chunks.length / 16000;
+			// reset recorded audio data
+			$scope.chunks = [];
+			// convert wav to blob
+			let blob = wav.toBlob();
+			// get url to be saved in the conversation
+			let url = URL.createObjectURL(blob);
+			// encode blob to base64 text to be sent to backend
+			let encodedBlob = await $scope.b2text(blob);
+			// send post request to flask backend
+			$http.post('/send_audio_msg', encodedBlob)
+			.then(function(response) {
+				// success
+				let userAudioMsg = {
+					"id": $scope.conversation.length,
+					"sender": "user",
+					"time": $scope.getTime(),
+					"body": {
+						"snd": url,
+						"text":response["data"]["text"],
+						"duration": audioDuration
+					},
+					"type": "audio"
+				};
+				// send message to Rasa server
+				$scope.userMsg = userAudioMsg["body"]["text"];
+				$scope.sendMessage(userAudioMsg);
+			},
+			function(response) { 
+				// failed
+				console.log(response);
+			});
 		}
 	};
 

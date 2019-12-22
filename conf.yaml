@@ -1,5 +1,4 @@
 asr:
-  ##### YOU CAN CHANGE THESE #####
   # set True if cuda is available
   cuda: False
   # either 'greedy' or 'beam'... use 'beam' when you have a language model

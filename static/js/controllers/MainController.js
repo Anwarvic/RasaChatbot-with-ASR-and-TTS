@@ -33,7 +33,11 @@ function($scope, $http, $timeout) {
 	// function to get the current time
 	$scope.getTime= function(){
 		let today = new Date();
-		return today.getHours() + ":" + today.getMinutes();
+		// hour with leading zero
+		let h = ("0"+today.getHours()).slice(-2);
+		// minute with leading zero
+		m = ("0"+today.getMinutes()).slice(-2)
+		return h + ":" + m;
 	}
 
 	// covert blob bytes to URL text
@@ -204,6 +208,14 @@ function($scope, $http, $timeout) {
 				// check mic button being still clicked upon
 				if ($scope.micDown){
 					console.log("Recording started!!");
+					// blur effect
+					document.getElementById("card_body").style.filter = "blur(5px)";
+					// recording message
+					let userHeadline = document.getElementById("user_headline");
+					userHeadline.textContent = "Recording";
+					userHeadline.style.color = "red";
+					userHeadline.classList.add("loading");
+					// connect audio devices
 					$scope.microphone.connect($scope.recorder);
 					$scope.recorder.connect($scope.audioCntxt.destination);
 				}
@@ -217,8 +229,16 @@ function($scope, $http, $timeout) {
 		console.log("Recording stopped!!");	
 		clearTimeout($scope.holdCounter);
 		if ($scope.chunks.length != 0 && $scope.microphone && $scope.recorder){
+			// disconnect audio devices
 			$scope.microphone.disconnect();
 			$scope.recorder.disconnect();
+			// remove blur effect
+			document.getElementById("card_body").style.removeProperty("filter");
+			// reset user headline
+			let userHeadline = document.getElementById("user_headline");
+			userHeadline.textContent = "Chat with User";
+			userHeadline.style.removeProperty("color");
+			userHeadline.classList.remove("loading");
 			// Convert buffer to WAV (sample rate: 16k, percision: 16-bit)
 			let wav = new synth.WAV(1, 16000, 16, true, $scope.chunks);
 			// get audio duration

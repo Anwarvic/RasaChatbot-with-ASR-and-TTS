@@ -30,7 +30,7 @@
 						<span class="online_icon"></span>
 					</div>
 					<div class="user_info">
-						<span>Chat with User</span>
+						<span id="user_headline">Chat with User</span>
 						<p>{a conversation.length a} Messages</p>
 					</div>
 				</div>
@@ -56,7 +56,7 @@
 					</ul>
 				</div>
 			</div>
-			<div class="card-body msg_card_body" ng-click="untoggle()" scroll-to-bottom="conversation">
+			<div id="card_body" class="card-body msg_card_body" ng-click="untoggle()" scroll-to-bottom="conversation">
 				<div ng-repeat="msg in conversation">
 					
 					<div class="d-flex justify-content-end mb-4" ng-if=" msg.sender== 'user' ">

@@ -25,18 +25,12 @@ function($scope, $http, $timeout) {
 	$scope.enableSending = true;
 	// duration of holding before recording
 	$scope.holdDuration = 1000;
-	// flags to be changed when record/stop events are fired
-	$scope.startRecording = false;
-	$scope.stopRecording = false;
 
 	//////////////////// helper functions ////////////////////
 	// function to get the current time
 	$scope.getTime= function(){
-		var today = new Date();
-		// var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-		var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-		// var dateTime = date+' '+time;
-		return time;
+		let today = new Date();
+		return today.getHours() + ":" + today.getMinutes();
 	}
 
 	// covert blob bytes to URL text
@@ -81,7 +75,7 @@ function($scope, $http, $timeout) {
 				// iterate over Rasa's messages
 				response['data'].forEach(async function(element) {
 					// formulate bot response
-					var rasaMsg = { "id": $scope.conversation.length,
+					let rasaMsg = { "id": $scope.conversation.length,
 									"sender": "bot",
 									"time": $scope.getTime(),
 									"type": element["type"],
@@ -110,7 +104,7 @@ function($scope, $http, $timeout) {
 	// function to 
 	$scope.submitMessage = function(){
 		if ($scope.userMsg && $scope.enableSending){
-			var userTextMsg = {
+			let userTextMsg = {
 				"id": $scope.conversation.length,
 				"sender": "user",
 				"body": $scope.userMsg,
@@ -161,24 +155,30 @@ function($scope, $http, $timeout) {
 	
 	// get browser mic permission
 	$scope.haveMicPermission = false;
-	$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
+	$scope.micTitle = $scope.config.asr
+					? "Hold to record, Release to send"
+					: "Enable ASR from top-right menu";
 	
 	$scope.getMicPermission = function(){
-		$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
+		$scope.micTitle = $scope.config.asr
+						? "Hold to record, Release to send"
+						: "Enable ASR from top-right menu";
 		if ($scope.config.asr && !$scope.haveMicPermission){
 			$scope.haveMicPermission = true;
 			console.log("Getting Permission");
 			return new Promise(async resolve => {
 				$scope.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-				// objects for recording
+				// audio buffer size
 				let bufferSize = 1024;
+				// necessary objects for recording audio
 				$scope.audioCntxt = new AudioContext();
 				$scope.microphone = $scope.audioCntxt.createMediaStreamSource($scope.stream);
 				$scope.recorder = $scope.audioCntxt.createScriptProcessor(bufferSize, 1, 1);
 				// resampler object (16k, mono is what ASR expects)
 				res = new Resampler($scope.audioCntxt.sampleRate, 16000, 1, bufferSize);
-				// whenever audio data is available
+				// object to save audio data
 				$scope.chunks = [];
+				// whenever audio data is available
 				$scope.recorder.onaudioprocess = function(e) {
 					const inBuf = e.inputBuffer.getChannelData(0);
 					const outBuf = res.resample(inBuf);
@@ -188,33 +188,31 @@ function($scope, $http, $timeout) {
 		}
 	};
 	
-	// counter to track holding period
+	// counter to track the holding period
 	$scope.holdCounter = 0;
 	// record function for the ASR
 	$scope.record = function(){
 		console.log("record btn is clicked");
-		//hold for 1s to start recording
+		//hold for a certain period to start recording
 		$scope.holdCounter = setTimeout(function(){
 			// play trigger
 			let snd = new Audio("/static/audio/tone.wav");
 			snd.play();
-			$timeout(function (){
+			snd.onended = function(){
 				console.log("START RECORDING");
 				$scope.microphone.connect($scope.recorder);
 				$scope.recorder.connect($scope.audioCntxt.destination);
-			}, 500); //500 is the duration of tone.wav
-			// onended DIDN'T WORK, DON'T KNOW WHY!!
-			// snd.onended = function(){
-			// 	$scope.startRecording();
-			// };
-		}, 1000);
+			};
+		}, $scope.holdDuration);
 	};
 
 	// stop recording function for the ASR
 	$scope.stop = async function(){
 		if ($scope.holdCounter){
+			console.log("ANWAR: "+$scope.holdCounter); //TODO: delete
 			console.log("Recording stopped!!");	
 			clearTimeout($scope.holdCounter);
+			console.log("ANWAR: "+$scope.holdCounter); //TODO: delete
 			if ($scope.chunks.length != 0 && $scope.microphone && $scope.recorder){
 				$scope.microphone.disconnect();
           		$scope.recorder.disconnect();
@@ -234,7 +232,7 @@ function($scope, $http, $timeout) {
 				$http.post('/send_audio_msg', encodedBlob)
 				.then(function(response) {
 					// success
-					var userAudioMsg = {
+					let userAudioMsg = {
 						"id": $scope.conversation.length,
 						"sender": "user",
 						"time": $scope.getTime(),
@@ -256,7 +254,6 @@ function($scope, $http, $timeout) {
 			}
 		}
 	};
-
 
 	// play audio file
 	$scope.play = function(id){

@@ -158,72 +158,31 @@ function($scope, $http, $timeout) {
 			});
 		})
 	};
-
+	
 	// get browser mic permission
 	$scope.haveMicPermission = false;
 	$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
-
+	
 	$scope.getMicPermission = function(){
 		$scope.micTitle = $scope.config.asr ? "Hold to record, Release to send" : "Enable ASR from top-right menu";
 		if ($scope.config.asr && !$scope.haveMicPermission){
 			$scope.haveMicPermission = true;
 			console.log("Getting Permission");
 			return new Promise(async resolve => {
-				let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-				// the main object responsible for anything related to Audio
+				$scope.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+				// objects for recording
+				let bufferSize = 1024;
 				$scope.audioCntxt = new AudioContext();
-				var source = $scope.audioCntxt.createMediaStreamSource(stream);
-				var processor = $scope.audioCntxt.createScriptProcessor(1024, 1, 1);
-				// resampler object (16000 is what ASR expects)
-				let res = new Resampler($scope.audioCntxt.sampleRate, 16000, 1, 1024);
-				var chunks = [];
-
-				source.connect(processor);
-				processor.connect($scope.audioCntxt.destination);
-
-				// NOTE: this function is running all the time
-				processor.onaudioprocess = async function(e) {
-					// this is
-					if($scope.startRecording){
-						const inBuf = e.inputBuffer.getChannelData(0);
-						const outBuf = res.resample(inBuf);
-						chunks.push.apply(chunks, outBuf);
-						if ($scope.stopRecording) {
-							$scope.audioCntxt.close();
-							// Convert buffer to WAV (sample rate: 16k, percision: 16-bit)
-							let wav = new synth.WAV(1, 16000, 16, true, chunks);
-							let audioDuration = chunks.length / 16000;
-							let blob = wav.toBlob();
-							// do something with blob
-							let url = URL.createObjectURL(blob);
-							// encode blob to base64 text
-							let encodedBlob = await $scope.b2text(blob);
-							// send post request to flask backend
-							$http.post('/send_audio_msg', encodedBlob)
-							.then(function(response) {
-								// success
-								var userAudioMsg = {
-									"id": $scope.conversation.length,
-									"sender": "user",
-									"time": $scope.getTime(),
-									"body": {
-										"snd": url,
-										"text":response["data"]["text"],
-										"duration": audioDuration
-									},
-									"type": "audio"};
-								// send message to Rasa server
-								$scope.userMsg = userAudioMsg["body"]["text"];
-								$scope.sendMessage(userAudioMsg);
-								
-							},
-							function(response) { 
-								// failed
-								console.log(response);
-							});
-							$scope.startRecording = false;
-						}
-					}
+				$scope.microphone = $scope.audioCntxt.createMediaStreamSource($scope.stream);
+				$scope.recorder = $scope.audioCntxt.createScriptProcessor(bufferSize, 1, 1);
+				// resampler object (16k, mono is what ASR expects)
+				res = new Resampler($scope.audioCntxt.sampleRate, 16000, 1, bufferSize);
+				// whenever audio data is available
+				$scope.chunks = [];
+				$scope.recorder.onaudioprocess = function(e) {
+					const inBuf = e.inputBuffer.getChannelData(0);
+					const outBuf = res.resample(inBuf);
+					$scope.chunks.push.apply($scope.chunks, outBuf);
 				};
 			});
 		}
@@ -241,8 +200,9 @@ function($scope, $http, $timeout) {
 			snd.play();
 			$timeout(function (){
 				console.log("START RECORDING");
-				$scope.startRecording = true;
-				$scope.stopRecording = false;
+				$scope.chunks = [];
+				$scope.microphone.connect($scope.recorder);
+				$scope.recorder.connect($scope.audioCntxt.destination);
 			}, 500); //500 is the duration of tone.wav
 			// onended DIDN'T WORK, DON'T KNOW WHY!!
 			// snd.onended = function(){
@@ -252,13 +212,44 @@ function($scope, $http, $timeout) {
 	};
 
 	// stop recording function for the ASR
-	$scope.stop = function(){
+	$scope.stop = async function(){
 		if ($scope.holdCounter){
-			console.log("Recording stopped!!");
+			console.log("Recording stopped!!");	
 			clearTimeout($scope.holdCounter);
 			if ($scope.audioCntxt.state == "running"){
-				$scope.stopRecording = true;
-				console.log("STOPPED");
+				$scope.microphone.disconnect();
+          		$scope.recorder.disconnect();
+				// Convert buffer to WAV (sample rate: 16k, percision: 16-bit)
+				let wav = new synth.WAV(1, 16000, 16, true, $scope.chunks);
+				let audioDuration = $scope.chunks.length / 16000;
+				let blob = wav.toBlob();
+				// do something with blob
+				let url = URL.createObjectURL(blob);
+				// encode blob to base64 text
+				let encodedBlob = await $scope.b2text(blob);
+				// send post request to flask backend
+				$http.post('/send_audio_msg', encodedBlob)
+				.then(function(response) {
+					// success
+					var userAudioMsg = {
+						"id": $scope.conversation.length,
+						"sender": "user",
+						"time": $scope.getTime(),
+						"body": {
+							"snd": url,
+							"text":response["data"]["text"],
+							"duration": audioDuration
+						},
+						"type": "audio"};
+					// send message to Rasa server
+					$scope.userMsg = userAudioMsg["body"]["text"];
+					$scope.sendMessage(userAudioMsg);
+					
+				},
+				function(response) { 
+					// failed
+					console.log(response);
+				});
 			}
 		}
 	};

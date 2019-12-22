@@ -200,7 +200,6 @@ function($scope, $http, $timeout) {
 			snd.play();
 			$timeout(function (){
 				console.log("START RECORDING");
-				$scope.chunks = [];
 				$scope.microphone.connect($scope.recorder);
 				$scope.recorder.connect($scope.audioCntxt.destination);
 			}, 500); //500 is the duration of tone.wav
@@ -216,16 +215,20 @@ function($scope, $http, $timeout) {
 		if ($scope.holdCounter){
 			console.log("Recording stopped!!");	
 			clearTimeout($scope.holdCounter);
-			if ($scope.audioCntxt.state == "running"){
+			if ($scope.chunks.length != 0 && $scope.microphone && $scope.recorder){
 				$scope.microphone.disconnect();
           		$scope.recorder.disconnect();
 				// Convert buffer to WAV (sample rate: 16k, percision: 16-bit)
 				let wav = new synth.WAV(1, 16000, 16, true, $scope.chunks);
+				// get audio duration
 				let audioDuration = $scope.chunks.length / 16000;
+				// reset recorded audio data
+				$scope.chunks = [];
+				// convert wav to blob
 				let blob = wav.toBlob();
-				// do something with blob
+				// get url to be saved in the conversation
 				let url = URL.createObjectURL(blob);
-				// encode blob to base64 text
+				// encode blob to base64 text to be sent to backend
 				let encodedBlob = await $scope.b2text(blob);
 				// send post request to flask backend
 				$http.post('/send_audio_msg', encodedBlob)
@@ -240,11 +243,11 @@ function($scope, $http, $timeout) {
 							"text":response["data"]["text"],
 							"duration": audioDuration
 						},
-						"type": "audio"};
+						"type": "audio"
+					};
 					// send message to Rasa server
 					$scope.userMsg = userAudioMsg["body"]["text"];
 					$scope.sendMessage(userAudioMsg);
-					
 				},
 				function(response) { 
 					// failed
@@ -290,7 +293,7 @@ function($scope, $http, $timeout) {
 
 }]);
 
-
+// responsible for scrolling down the page whenever a new message is posted
 app.directive('scrollToBottom', function($timeout, $window) {
     return {
         scope: {

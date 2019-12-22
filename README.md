@@ -49,7 +49,7 @@ Here is a table of the least acceptable version of each mainstream browser out t
 
 
 
-# Special Thanks
+# acknowledgements
 
 Special Thanks to:
 
@@ -57,3 +57,4 @@ Special Thanks to:
 - ESPNet organization for training all provided TTS models.
 - SamimOnline for providing the early [Bootstrap template](https://bootsnipp.com/snippets/nNg98)
 - Patrick Roberts for the [synth-js](https://github.com/patrickroberts/synth-js) JavaScript plugin.
+- [Remon Kamal](https://github.com/RemonComputer) for the technical help during this project... without you, I would have done nothing in this project.

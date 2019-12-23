@@ -65,13 +65,18 @@ Here is a table of the least acceptable version of each mainstream browser out t
 </table>
 
 
+# Issues
+
+- This interface doesn't work on **Internet Explorer**, and I need to check its status with **Edge**.
+- The TTS interface has a problem whenever Rasa responds with more than one `text` message... It handles multiple responses perfectly as long as they have one `text` message. If Rasa responds with more than one `text` message, all the `text` messages are being played at the same time. 
+
 
 # Acknowledgements
 
 Special Thanks to:
 
-- Sean Naren for training the provided ASR model.
-- ESPNet organization for training all provided TTS models.
+- [Sean Naren](https://github.com/SeanNaren/deepspeech.pytorch/releases/tag/v2.0) for training the provided ASR model.
+- [ESPNet](https://github.com/espnet/espnet#tts-results) organization for training all provided TTS models.
 - SamimOnline for providing the early [Bootstrap template](https://bootsnipp.com/snippets/nNg98)
 - Patrick Roberts for the [synth-js](https://github.com/patrickroberts/synth-js) JavaScript plugin.
-- [Remon Kamal](https://github.com/RemonComputer) for the technical help during this project... without you, I would have done nothing in this project.
+- [Remon Kamal](https://github.com/RemonComputer) for the technical help during this project... his guidance was at help!!

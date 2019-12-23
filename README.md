@@ -15,6 +15,7 @@ Here is a table of the least acceptable version of each mainstream browser out t
             <th  colspan="6">Mobile</th>
         </tr>
         <tr>
+            <th></th>
             <th>Chrome</th>
             <th>Edge</th>
             <th>Firefox</th>
@@ -31,25 +32,41 @@ Here is a table of the least acceptable version of each mainstream browser out t
     </thead>
     <tbody>
         <tr>
-            <td>:heavy_check_mark: Full support 35 </td>
-            <td>:heavy_check_mark: Full support</td>
-            <td>:heavy_check_mark: Full support 25</td>
-            <td>:x: No support</td>
-            <td>:heavy_check_mark: Full support 22</td>
-            <td>:heavy_check_mark: Full support 6</td>
-            <td>:heavy_check_mark: Full support</td>
-            <td>:heavy_check_mark: Full support 35</td>
-            <td>:heavy_check_mark: Full support 26</td>
-            <td>:heavy_check_mark: Full support 22</td>
-            <td>:heavy_check_mark: Full support</td>
-            <td>:heavy_check_mark: Full support</td>
+            <th scope="row">Support</th>
+            <td>:heavy_check_mark:</td>
+            <td>:heavy_check_mark:</td>
+            <td>:heavy_check_mark:</td>
+            <td>:x:</td>
+            <td>:heavy_check_mark:</td>
+            <td>:heavy_check_mark:</td>
+            <td>:heavy_check_mark:</td>
+            <td>:heavy_check_mark:</td>
+            <td>:heavy_check_mark:</td>
+            <td>:heavy_check_mark:</td>
+            <td>:heavy_check_mark:</td>
+            <td>:heavy_check_mark:</td>
+        </tr>
+        <tr>
+            <th scope="row">Least Acceptable Version</th>
+            <td>35 </td>
+            <td>Full support</td>
+            <td>25</td>
+            <td>No support</td>
+            <td>22</td>
+            <td>6</td>
+            <td>Full support</td>
+            <td>35</td>
+            <td>26</td>
+            <td>22</td>
+            <td>Full support</td>
+            <td>Full support</td>
         </tr>
     </tbody>
 </table>
 
 
 
-# acknowledgements
+# Acknowledgements
 
 Special Thanks to:
 

@@ -264,8 +264,6 @@ function($scope, $http, $timeout) {
 			let blob = wav.toBlob();
 			// get url to be saved in the conversation
 			let url = URL.createObjectURL(blob);
-			// encode blob to base64 text to be sent to backend
-			let encodedBlob = await $scope.b2text(blob);
 			// send post request to flask backend
 			$http.post('/send_audio_msg', wav)
 			.then(function(response) {

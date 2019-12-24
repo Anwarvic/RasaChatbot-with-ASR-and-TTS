@@ -6,7 +6,7 @@ function($scope, $http, $timeout) {
 	// control app configulration
 	$scope.config = {
 		asr: false,
-		tts: true
+		tts: false
 	};
 
 	// toggle the ellipsis menu
@@ -267,7 +267,7 @@ function($scope, $http, $timeout) {
 			// encode blob to base64 text to be sent to backend
 			let encodedBlob = await $scope.b2text(blob);
 			// send post request to flask backend
-			$http.post('/send_audio_msg', encodedBlob)
+			$http.post('/send_audio_msg', wav)
 			.then(function(response) {
 				// success
 				// remove loading message

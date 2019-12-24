@@ -5,7 +5,7 @@ import requests
 import librosa
 import numpy as np
 from scipy.io import wavfile 
-from base64 import b64encode, b64decode
+from base64 import b64encode
 
 from asr import ASR
 from tts import TTS
@@ -122,20 +122,8 @@ def call_asr():
 	"""
 	tic = time.time()
 	req = flask.request.data.decode("utf-8")
-	header, *bytes_stream = req.split(',')
-	wav = b64decode(bytes_stream[0])
-	# write the wav into temporary file
-	with open(".tmp.wav", "wb") as fout:
-		fout.write(wav)
-	sr, wav = wavfile.read(".tmp.wav")
-	os.remove(".tmp.wav")
-	# copying is essential for re-scaling
-	wav = np.copy(wav)
-	# re=scale the audio
-	max_amp = np.max(np.abs(wav))
-	wav *= np.iinfo(np.int16).max // max_amp
-	# convert it to np.float32
-	wav = wav.astype(np.float32) / np.iinfo(np.int16).max
+	audio_arr = flask.json.loads(req)["data"]
+	wav = np.array(audio_arr, np.float32)
 	# transcribe the provided data
 	out = asr_model.transcribe(wav)
 	toc = time.time()
@@ -157,9 +145,9 @@ if __name__ == '__main__':
 	asr_conf = conf["asr"]
 	asr_model = ASR(asr_conf)
 
-	# load TTS model
-	tts_conf = conf["tts"]
-	tts_model = TTS(tts_conf)
+	# # load TTS model
+	# tts_conf = conf["tts"]
+	# tts_model = TTS(tts_conf)
 
 	# run server
 	app.run(host="0.0.0.0", port=5000)

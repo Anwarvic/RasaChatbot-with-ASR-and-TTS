@@ -6,10 +6,11 @@ import librosa
 import numpy as np
 from scipy.io import wavfile 
 from base64 import b64encode
+# from scipy.signal import wiener
 
 from asr import ASR
 from tts import TTS
-from utils import parse_yaml
+from utils import *
 
 
 
@@ -124,8 +125,15 @@ def call_asr():
 	req = flask.request.data.decode("utf-8")
 	audio_arr = flask.json.loads(req)["data"]
 	wav = np.array(audio_arr, np.float32)
+	# normalize ([-1:1] normalization)
+	scaled = normalize_audio(wav, method="-1_1")
+	# reduce noise
+	reduced, _ = reduce_noise(scaled) #comment this to make ASR a bit faster
+	# reduced = wiener(scaled)
+	# wavfile.write("recorded.wav", 16000, reduced)
+	
 	# transcribe the provided data
-	out = asr_model.transcribe(wav)
+	out = asr_model.transcribe(scaled)
 	toc = time.time()
 	print( "ASR Duration: {} seconds".format(toc-tic) )
 	# form response
@@ -145,9 +153,9 @@ if __name__ == '__main__':
 	asr_conf = conf["asr"]
 	asr_model = ASR(asr_conf)
 
-	# # load TTS model
-	# tts_conf = conf["tts"]
-	# tts_model = TTS(tts_conf)
+	# load TTS model
+	tts_conf = conf["tts"]
+	tts_model = TTS(tts_conf)
 
 	# run server
 	app.run(host="0.0.0.0", port=5000)

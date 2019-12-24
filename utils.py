@@ -2,6 +2,7 @@ import yaml
 import math
 import numpy as np
 from scipy.special import expn
+from scipy.signal import wiener
 
 
 
@@ -94,32 +95,41 @@ def logmmse(x, Srate, noise_frames=6, Slen=0, eta=0.15, saved_params=None):
     return xfinal, {'noise_mu2': noise_mu2, 'Xk_prev': Xk_prev, 'x_old': x_old}
 
 
-def reduce_noise(audio, initial_noise=6, window_size=0, noise_threshold=0.15):
+def reduce_noise(audio, method="wiener"):
     """
-    Apply the LogMMSE method to reduce audio noise
+    Apply a certain method to reduce audio noise.
     Args:
         audio (numpy.array): the audio data as 1D numpy array
     Returns:
-        numpy.array of the audio after reducing the noise 
+        numpy.array of the audio after reducing the noise
+    NOTE: wiener is faster than logmmse
     """
-    sr = 16000 #sample rate
-    chunk_size = 60*sr #number of frames per second
-    total_frames = audio.shape[0] #
+    methods = ["logmmse", "wiener"]
+    assert method in methods, \
+        "noise-reduction method must be one of these " + str(methods)
     output = np.array([], dtype=np.float32)
-    frames_read = 0
-    # iterate 1s at a time
-    while frames_read < total_frames:
-        if frames_read + chunk_size > total_frames:
-            frames = total_frames - frames_read
-        else:
-            frames = chunk_size
-        audio_subsample = audio[frames_read:frames_read + frames]
-        frames_read = frames_read + frames
-        _output, saved_params = logmmse(audio_subsample, sr, initial_noise,
-                                        window_size, noise_threshold)
-        output = np.concatenate( (output, _output) )
-    
-    return output, saved_params
+    if method == "logmmse":
+        sr = 16000 #sample rate
+        # you can tune the following values
+        initial_noise, window_size, noise_threshold = 6, 0, 0.15
+        # number of frames per second
+        chunk_size = 60*sr
+        total_frames = audio.shape[0]
+        frames_read = 0
+        # iterate 1 second at a time
+        while frames_read < total_frames:
+            if frames_read + chunk_size > total_frames:
+                frames = total_frames - frames_read
+            else:
+                frames = chunk_size
+            audio_subsample = audio[frames_read:frames_read + frames]
+            frames_read = frames_read + frames
+            _output, _ = logmmse(audio_subsample, sr, initial_noise,
+                                            window_size, noise_threshold)
+            output = np.concatenate( (output, _output) )
+    elif method == "wiener":
+        output = wiener(audio)
+    return output
 
 
 
@@ -141,7 +151,7 @@ def normalize_audio(audio, method="z-score"):
     """
     norm_methods = ["-1_1", "z-score", "mean"]
     assert method in norm_methods,\
-            "normalization method must be one of these " + norm_methods
+            "normalization method must be one of these " + str(norm_methods)
     if method == "-1_1":
         # apply 0-1 normalization method
         new_min, new_max = -1, 1

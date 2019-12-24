@@ -6,7 +6,6 @@ import librosa
 import numpy as np
 from scipy.io import wavfile 
 from base64 import b64encode
-# from scipy.signal import wiener
 
 from asr import ASR
 from tts import TTS
@@ -127,11 +126,10 @@ def call_asr():
 	wav = np.array(audio_arr, np.float32)
 	# normalize ([-1:1] normalization)
 	scaled = normalize_audio(wav, method="-1_1")
-	# reduce noise
-	reduced, _ = reduce_noise(scaled) #comment this to make ASR a bit faster
-	# reduced = wiener(scaled)
-	# wavfile.write("recorded.wav", 16000, reduced)
-	
+	# reduce noise (comment it to make ASR a bit faster)
+	reduced = reduce_noise(scaled, method="wiener")
+	# write the recorded audio (for debugging reasons)
+	# wavfile.write(filename="recorded.wav", rate=16000, data=reduced)
 	# transcribe the provided data
 	out = asr_model.transcribe(scaled)
 	toc = time.time()

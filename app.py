@@ -125,13 +125,13 @@ def call_asr():
 	audio_arr = flask.json.loads(req)["data"]
 	wav = np.array(audio_arr, np.float32)
 	# normalize ([-1:1] normalization)
-	scaled = normalize_audio(wav, method="-1_1")
+	wav = normalize_audio(wav, method="-1_1")
 	# reduce noise (comment it to make ASR a bit faster)
-	reduced = reduce_noise(scaled, method="wiener")
+	wav = reduce_noise(wav, method="wiener")
 	# write the recorded audio (for debugging reasons)
-	# wavfile.write(filename="recorded.wav", rate=16000, data=reduced)
+	# wavfile.write(filename="recorded.wav", rate=16000, data=wav)
 	# transcribe the provided data
-	out = asr_model.transcribe(scaled)
+	out = asr_model.transcribe(wav)
 	toc = time.time()
 	print( "ASR Duration: {} seconds".format(toc-tic) )
 	# form response

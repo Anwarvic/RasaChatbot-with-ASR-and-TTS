@@ -6,7 +6,7 @@ function($scope, $http, $timeout) {
 	// control app configulration
 	$scope.config = {
 		asr: false,
-		tts: false
+		tts: true
 	};
 
 	// toggle the ellipsis menu
@@ -315,8 +315,14 @@ function($scope, $http, $timeout) {
 	};
 
 	// play audio returned from TTS
-	$scope.TTSplay = async function(b64buff){
-		let snd = new Audio("data:audio/wav;base64," + b64buff);
+	$scope.TTSplay = async function(data){
+		let buff = new Float32Array(data);
+		let wav = new synth.WAV(1, 22050, 32, true, buff);
+		// convert wav to blob
+		let blob = wav.toBlob();
+		// get url to be saved in the conversation
+		let url = URL.createObjectURL(blob);
+		let snd = new Audio(url);
 		// fires when TTS audio is playing
 		snd.onplaying = function(){
 			console.log("TTS Playing!");

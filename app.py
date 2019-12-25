@@ -80,24 +80,9 @@ def call_chatbot():
 		if use_tts and d["type"] == "text":
 			tic = time.time()
 			wav, sr = tts_model.synthesize(d["body"])
-			# convert wav from float32 to int16
-			wav = (wav * np.iinfo(np.int16).max).astype(np.int16)
-			# write the wav into temporary file
-			wavfile.write(".tmp.wav", sr, wav)
-			# read the bytes
-			with open(".tmp.wav", "rb") as fin:
-				wav = fin.read()
-			# remove tmp file
-			os.remove(".tmp.wav")
-			# convert it to base64 bytes
-			bytes_stream = b64encode(wav)
-			# decode bytes into string to be JSON serializable
-			processed_string = bytes_stream.decode("utf-8")
-			# pass the string
-			d["snd"] = processed_string
+			d["snd"] = wav.tolist()
 			toc = time.time()
 			print( "TTS Duration: {} seconds".format(toc-tic) )
-		
 		result.append(d)
 
 	# get back the result

@@ -2,22 +2,6 @@
 
 app.controller('MainController', ['$scope', '$http', '$timeout',
 function($scope, $http, $timeout) {
-	//////////////////// HTML click functions ////////////////////
-	// control app configulration
-	$scope.config = {
-		asr: false,
-		tts: true
-	};
-
-	// toggle the ellipsis menu
-	$scope.showMenu = function(){
-		angular.element('.action_menu').toggle();
-	};
-
-	// un-toggle the ellipsis menu
-	$scope.untoggle = function(){
-		angular.element('.action_menu').hide();
-	}
 	//////////////////// Variables ////////////////////
 	// basic datatype for the session conversation
 	$scope.conversation = [];
@@ -27,7 +11,27 @@ function($scope, $http, $timeout) {
 	$scope.holdDuration = 1000;
 	// variable to track the condition of the mic button
 	$scope.micDown = false;
+	// control app configulration
+	$scope.config = {
+		asr: false,
+		tts: true
+	};
 
+	//////////////////// HTML click functions ////////////////////
+	// control mic icon title
+	$scope.micTitle = $scope.config.asr
+					? "Hold to record, Release to send"
+					: "Enable ASR from top-right menu";
+
+	// toggle the ellipsis menu				
+	$scope.showMenu = function(){
+		angular.element('.action_menu').toggle();
+	};	
+
+	// un-toggle the ellipsis menu
+	$scope.untoggle = function(){
+		angular.element('.action_menu').hide();
+	};
 
 	//////////////////// helper functions ////////////////////
 	// function to get the current time
@@ -36,17 +40,10 @@ function($scope, $http, $timeout) {
 		// hour with leading zero
 		let h = ("0"+today.getHours()).slice(-2);
 		// minute with leading zero
-		m = ("0"+today.getMinutes()).slice(-2)
+		let m = ("0"+today.getMinutes()).slice(-2);
 		return h + ":" + m;
-	}
+	};
 
-	// covert blob bytes to URL text
-	$scope.b2text = blob => new Promise(resolve => {
-		const reader = new FileReader();
-		reader.onloadend = e => resolve(e.srcElement.result);
-		reader.readAsDataURL(blob);
-	});
-	
 	//////////////////// Main functions ////////////////////
 	// function to view user message
 	$scope.presentUserMessage = function(userMsg){
@@ -63,16 +60,18 @@ function($scope, $http, $timeout) {
 	$scope.presentRasaResponse = function(obj){
 		return new Promise((resolve, reject) =>{
 			// prepare loading message
-			let botLoadingMsg = { "id": $scope.conversation.length,
-								"sender": "bot",
-								"time": "",
-								"type": "text",
-								"body": ""};
+			let botLoadingMsg = {
+				"id": $scope.conversation.length,
+				"sender": "bot",
+				"time": "",
+				"type": "text",
+				"body": ""
+			};
 			$scope.conversation.push(botLoadingMsg);
 			// adding loading style
 			$timeout(function(){
 				document.getElementById("msg#"+botLoadingMsg["id"]).classList.add("loading")
-			}, 10);
+			}, 0);
 			// call backend
 			$http.post('/send_message', obj)
 			.then(function(response) {
@@ -82,11 +81,13 @@ function($scope, $http, $timeout) {
 				// iterate over Rasa's messages
 				response['data'].forEach(async function(element) {
 					// formulate bot response
-					let rasaMsg = { "id": $scope.conversation.length,
-									"sender": "bot",
-									"time": $scope.getTime(),
-									"type": element["type"],
-									"body": element["body"]};
+					let rasaMsg = {
+						"id": $scope.conversation.length,
+						"sender": "bot",
+						"time": $scope.getTime(),
+						"type": element["type"],
+						"body": element["body"]
+					};
 					if (element["snd"]){
 						// wait for TTS
 						let promise = $scope.TTSplay(element["snd"]);
@@ -102,8 +103,7 @@ function($scope, $http, $timeout) {
 			},
 			function(response) { 
 				// failed
-				console.error(response);
-				reject("Rasa Response Suspended!!")
+				reject("Rasa Response Suspended!!");
 			});
 		});
 	};
@@ -163,10 +163,6 @@ function($scope, $http, $timeout) {
 	
 	// get browser mic permission
 	$scope.haveMicPermission = false;
-	$scope.micTitle = $scope.config.asr
-					? "Hold to record, Release to send"
-					: "Enable ASR from top-right menu";
-	
 	$scope.getMicPermission = function(){
 		$scope.micTitle = $scope.config.asr
 						? "Hold to record, Release to send"
@@ -188,8 +184,11 @@ function($scope, $http, $timeout) {
 				$scope.chunks = [];
 				// whenever audio data is available
 				$scope.recorder.onaudioprocess = function(e) {
-					const inBuf = e.inputBuffer.getChannelData(0);
-					const outBuf = res.resample(inBuf);
+					// get input buffer
+					let inBuf = e.inputBuffer.getChannelData(0);
+					// resample buffer using `res` object
+					let outBuf = res.resample(inBuf);
+					// add buffer to chunks member variable
 					$scope.chunks.push.apply($scope.chunks, outBuf);
 				};
 			});
@@ -243,17 +242,18 @@ function($scope, $http, $timeout) {
 			userHeadline.style.removeProperty("color");
 			userHeadline.classList.remove("loading");
 			// send loading message
-			let userLoadingMsg = { "id": $scope.conversation.length,
-								"sender": "user",
-								"time": "",
-								"type": "text",
-								"body": ""
+			let userLoadingMsg = {
+				"id": $scope.conversation.length,
+				"sender": "user",
+				"time": "",
+				"type": "text",
+				"body": ""
 			};
 			$scope.conversation.push(userLoadingMsg);
 			// adding loading style
 			$timeout(function(){
-				document.getElementById("msg#"+userLoadingMsg["id"]).classList.add("loading")
-			}, 1);
+				document.getElementById("msg#"+userLoadingMsg["id"]).classList.add("loading");
+			}, 0);
 			// Convert buffer to WAV (sample rate: 16k, percision: 16-bit)
 			let wav = new synth.WAV(1, 16000, 16, true, $scope.chunks);
 			// get audio duration
@@ -290,7 +290,7 @@ function($scope, $http, $timeout) {
 			},
 			function(response) { 
 				// failed
-				console.log(response);
+				reject("Rasa Response Suspended!!");
 			});
 		}
 	};
@@ -337,7 +337,7 @@ function($scope, $http, $timeout) {
 }]);
 
 // responsible for scrolling down the page whenever a new message is posted
-app.directive('scrollToBottom', function($timeout, $window) {
+app.directive('scrollToBottom', function($timeout) {
     return {
         scope: {
             scrollToBottom: "="
@@ -350,7 +350,6 @@ app.directive('scrollToBottom', function($timeout, $window) {
                         element[0].scrollTop =  element[0].scrollHeight;
                     }, 0);
                 }
-
             });
         }
     };

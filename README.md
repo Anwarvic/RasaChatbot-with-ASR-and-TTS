@@ -1,4 +1,4 @@
-# RasaChatbot-with-ASR-and-TTS
+# RasaChatbot with ASR and TTS
 This repository contains an attempt to incorporate Rasa Chatbot with state-of-the-art ASR (Automatic Speech Recognition) and TTS (Text-to-Speech) models directly without the need of running additional servers or socket connections.
 
 
@@ -11,7 +11,7 @@ Here is a table of the least acceptable version of each mainstream browser out t
 <table>
     <thead>
         <tr>
-            <th colspan="6">Desktop</th>
+            <th colspan="7">Desktop</th>
             <th  colspan="6">Mobile</th>
         </tr>
         <tr>

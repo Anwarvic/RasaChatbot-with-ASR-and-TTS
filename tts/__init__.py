@@ -13,6 +13,7 @@ from .utils import get_model_conf, torch_load, dynamic_import
 # add espnet to the system path
 sys.path.append("tts/espnet")
 
+# configuration of every model
 MODEL_CONF = {
     "tacotron2": {
         "trans_type": "char",
@@ -24,18 +25,18 @@ MODEL_CONF = {
   
     "fastspeech": {
         "trans_type": "phn",
-        "dict_path": "fastspeech/data/lang_1phn/train_no_dev_units.txt",
-        "model_path": "fastspeech/exp/phn_train_no_dev_pytorch_train_fastspeech.v4/results/model.last1.avg.best",
-        "vocoder_path": "ljspeech.parallel_wavegan.v1/checkpoint-400000steps.pkl",
-        "vocoder_conf": "ljspeech.parallel_wavegan.v1/config.yml"
+        "dict_path": "tts/models/fastspeech/data/lang_1phn/train_no_dev_units.txt",
+        "model_path": "tts/models/fastspeech/exp/phn_train_no_dev_pytorch_train_fastspeech.v4/results/model.last1.avg.best",
+        "vocoder_path": "tts/models/ljspeech.parallel_wavegan.v1/checkpoint-400000steps.pkl",
+        "vocoder_conf": "tts/models/ljspeech.parallel_wavegan.v1/config.yml"
     },
     
     "transformer": {
         "trans_type": "phn",
-        "dict_path": "transformer/data/lang_1phn/train_no_dev_units.txt",
-        "model_path": "transformer/exp/phn_train_no_dev_pytorch_train_pytorch_transformer.v3/results/model.last1.avg.best",
-        "vocoder_path": "ljspeech.parallel_wavegan.v1/checkpoint-400000steps.pkl",
-        "vocoder_conf": "ljspeech.parallel_wavegan.v1/config.yml"
+        "dict_path": "tts/models/transformer/data/lang_1phn/train_no_dev_units.txt",
+        "model_path": "tts/models/transformer/exp/phn_train_no_dev_pytorch_train_pytorch_transformer.v3/results/model.last1.avg.best",
+        "vocoder_path": "tts/models/ljspeech.parallel_wavegan.v1/checkpoint-400000steps.pkl",
+        "vocoder_conf": "tts/models/ljspeech.parallel_wavegan.v1/config.yml"
     }
 }
 
@@ -96,6 +97,16 @@ class TTS():
 
 
     def synthesize(self, input_text):
+        """
+        This method turns text into audio data
+        Args:
+            input_text (str): the user input text
+        Returns:
+            1D numpy.array of the audio data where the data is:
+            -> mono (just one channel)
+            -> sample rate is 22050 Hz
+            -> 32-bit floating-point
+        """
         with torch.no_grad():
             x = self.__frontend(input_text)
             inference_args = Namespace(**{"threshold": 0.5,

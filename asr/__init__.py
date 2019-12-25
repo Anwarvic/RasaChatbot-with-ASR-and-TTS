@@ -1,5 +1,4 @@
 import os
-import yaml
 import torch
 import librosa
 import numpy as np

@@ -1,11 +1,8 @@
-import os
 import time
 import flask
 import requests
-import librosa
 import numpy as np
-from scipy.io import wavfile 
-from base64 import b64encode
+# from scipy.io import wavfile
 
 from asr import ASR
 from tts import TTS

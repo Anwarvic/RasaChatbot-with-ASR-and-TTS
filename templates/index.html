@@ -34,9 +34,11 @@
 						<p>{a conversation.length a} Messages</p>
 					</div>
 				</div>
+				{% if show_menu %}
 				<a id="action_menu_btn" ng-click="showMenu()"><i class="fas fa-ellipsis-v"></i></a>
 				<div class="action_menu">
 					<ul>
+						{% if asr_enabled %}
 						<li>
 							<i class="fas fa-assistive-listening-systems"></i>
 							<span>Enable ASR</span>
@@ -45,6 +47,8 @@
 								<span class="slider round"></span>
 							</label>
 						</li>
+						{% endif %}
+						{% if tts_enabled %}
 						<li>
 							<i class="fas fa-bullhorn"></i>
 							<span>Enable TTS</span>
@@ -53,8 +57,10 @@
 								<span class="slider round"></span>
 							</label>
 						</li>
+						{% endif %}
 					</ul>
 				</div>
+				{% endif %}
 			</div>
 			<div id="card_body" class="card-body msg_card_body" ng-click="untoggle()" scroll-to-bottom="conversation">
 				<div ng-repeat="msg in conversation">
@@ -99,9 +105,11 @@
 						<input class="form-control" style="height:100%" placeholder="Type your message..." ng-model="userMsg">
 					</form>
 					<div class="input-group-append">
+						{% if asr_enabled %}
 						<button class="input-group-text send_btn send_btn2" ng-disabled="!config.asr" title="{a micTitle a}" ng-mousedown="record()" ng-mouseup="stop()">
 							<i class="fas fa-microphone-alt"></i>
 						</button>
+						{% endif %}
 						<button class="input-group-text send_btn send_btn1" ng-click="submitMessage()" title="Send button" ng-disabled="!enableSending">
 							<i class="fas fa-location-arrow"></i>
 						</button>

@@ -1,3 +1,4 @@
+import os
 import time
 import flask
 import requests
@@ -15,7 +16,25 @@ app = flask.Flask(__name__)
 
 @app.route('/')
 def index():
-	return flask.render_template("index.html")
+	# check existence of ASR pretrained models
+	mdls = ["an4_pretrained_v2.pth", "librispeech_pretrained_v2.pth",
+			  "ted_pretrained_v2.pth"]
+	asr_enabled = any([mdl in os.listdir("./asr/models") for mdl in mdls]) and \
+				  "asr_model" in globals()
+	
+	# check existence of TTS pretrained models
+	wavgan_model = "ljspeech.parallel_wavegan.v1"
+	mdls = ["fastspeech", "tacotron2", "transformer"]
+	tts_enabled = wavgan_model in os.listdir("./tts/models") and \
+			any([mdl in os.listdir("./tts/models") for mdl in mdls]) and \
+			"tts_model" in globals()
+	
+	return flask.render_template("index.html",
+								 asr_enabled = asr_enabled,
+								 tts_enabled = tts_enabled,
+								 show_menu = tts_enabled or asr_enabled)
+
+
 
 
 @app.route('/send_message', methods=['POST'])
@@ -132,7 +151,7 @@ if __name__ == '__main__':
 	# load ASR model
 	asr_conf = conf["asr"]
 	asr_model = ASR(asr_conf)
-
+	
 	# load TTS model
 	tts_conf = conf["tts"]
 	tts_model = TTS(tts_conf)

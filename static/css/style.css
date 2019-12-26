@@ -1,9 +1,9 @@
 body,html{
 	height: 100%;
 	margin: 0;
-	background: #7F7FD5;
-	/*background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
-	background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);*/
+	/* background: #7F7FD5; */
+	/*background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5); */
+	background: linear-gradient(to right, #ad5389, #3c1053);
 	overflow: scroll;
     overflow-x: hidden;
 }
@@ -27,7 +27,6 @@ a{
 
 .card{
 	height: 100%;
-	border-radius: 15px !important;
 	background-color: rgba(0,0,0,0.4) !important;
 }
 
@@ -188,6 +187,8 @@ a{
 
 .msg_head{
 	position: relative;
+	background-color: rgba(0,0,0,0.1);
+	border-radius: 40px;
 }
 
 #action_menu_btn{

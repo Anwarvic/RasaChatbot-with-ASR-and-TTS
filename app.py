@@ -59,7 +59,8 @@ def call_chatbot():
 	Returns:
 		the returned object is on the following structure:
 		[{ "id": int, "type": "image", "body": str},
-		 { "id": int, "type": "text", "body": str, "snd": str },
+		 { "id": int, "type": "text", "body": str, "snd":{ "audio": list,
+														   "sample_rate": int}},
 		 ...
 		]
 	
@@ -96,7 +97,11 @@ def call_chatbot():
 		if use_tts and d["type"] == "text":
 			tic = time.time()
 			wav, sr = tts_model.synthesize(d["body"])
-			d["snd"] = wav.tolist()
+			duration = len(wav) / sr
+			d["snd"] = {
+				"audio": wav.tolist(),
+				"sample_rate": sr,
+			}
 			toc = time.time()
 			print( "TTS Duration: {} seconds".format(toc-tic) )
 		result.append(d)

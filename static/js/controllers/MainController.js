@@ -315,9 +315,9 @@ function($scope, $http, $timeout) {
 	};
 
 	// play audio returned from TTS
-	$scope.TTSplay = async function(data){
-		let buff = new Float32Array(data);
-		let wav = new synth.WAV(1, 22050, 32, true, buff);
+	$scope.TTSplay = async function(snd_obj){
+		let buff = new Float32Array(snd_obj["audio"]);
+		let wav = new synth.WAV(1, snd_obj["sample_rate"], 32, true, buff);
 		// convert wav to blob
 		let blob = wav.toBlob();
 		// get url to be saved in the conversation

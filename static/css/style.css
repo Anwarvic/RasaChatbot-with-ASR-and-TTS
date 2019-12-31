@@ -1,8 +1,6 @@
 body,html{
 	height: 100%;
 	margin: 0;
-	/* background: #7F7FD5; */
-	/*background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5); */
 	background: linear-gradient(to right, #ad5389, #3c1053);
 	overflow: scroll;
     overflow-x: hidden;
@@ -16,18 +14,11 @@ a{
 	text-decoration: none;
 }
 
-.h-100{
-	height: 100%;
-}
-
-.chat{
-	margin-top: auto;
-	margin-bottom: auto;
-}
-
 .card{
 	height: 100%;
 	background-color: rgba(0,0,0,0.4) !important;
+	margin-top: auto;
+	margin-bottom: auto;
 }
 
 .msg_card_body{
@@ -153,10 +144,9 @@ a{
 	margin-bottom: auto;
 	margin-right: 10px;
 	border-radius: 25px;
-	/* background-color: #78e08f; */
 	padding: 10px;
 	position: relative;
-	/* HERE */
+	/* transition effect */
 	background: linear-gradient(to right, #407c4d 50%, #78e08f 50%);
 	background-size: 200% 100%;
 	background-position:right bottom;
@@ -198,6 +188,7 @@ a{
 	color: white;
 	cursor: pointer;
 	font-size: 20px;
+	padding: 10px;
 }
 
 .action_menu{
@@ -290,7 +281,7 @@ input:checked + .slider:before {
 	border-radius: 50%;
 }
 
-/* This part is responsible for the loading message */
+/* This part is responsible for the loading messages */
 .loading:after {
 	overflow: hidden;
 	display: inline-block;

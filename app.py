@@ -1,6 +1,7 @@
 import os
 import time
 import flask
+import logging
 import requests
 import numpy as np
 # from scipy.io import wavfile
@@ -13,6 +14,11 @@ from utils import *
 
 
 app = flask.Flask(__name__)
+# configure logger
+logging.basicConfig(
+	level=logging.INFO,
+	format="%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s"
+)
 
 @app.route('/')
 def index():
@@ -70,6 +76,7 @@ def call_chatbot():
 	# prase the given data
 	data = flask.json.loads(flask.request.data.decode('utf-8'))
 	use_tts, text, current_id= data["useTTS"], data["text"], data["id"]
+	app.logger.info("User Query: "+ text)
 	
 	result = []
 	# call rasa: some requests get lost, loop till you get a response
@@ -87,7 +94,8 @@ def call_chatbot():
 			res = [{'recipient_id': 'Rasa',
 					'text': "[SOMETHING WENT WRONG!!]"}]
 		if res: break
-	print(res)
+	app.logger.info("Rasa Response:")
+	app.logger.info("\t"+ str(res))
 	for item in res:
 		d = {}
 		current_id += 1
@@ -103,7 +111,7 @@ def call_chatbot():
 				"sample_rate": sr,
 			}
 			toc = time.time()
-			print( "TTS Duration: {} seconds".format(toc-tic) )
+			app.logger.info( "TTS Duration: {} seconds".format(toc-tic) )
 		result.append(d)
 
 	# get back the result
@@ -139,9 +147,10 @@ def call_asr():
 	# transcribe the provided data
 	out = asr_model.transcribe(wav)
 	toc = time.time()
-	print( "ASR Duration: {} seconds".format(toc-tic) )
+	app.logger.info("ASR Model Transcription: "+out)
+	app.logger.info("ASR Duration: {} seconds".format(toc-tic))
 	# form response
-	flask_response = app.response_class(response=flask.json.dumps({"text": out}),
+	flask_response= app.response_class(response=flask.json.dumps({"text": out}),
 										status=200,
 										mimetype='application/json' )
 	return flask_response
@@ -154,12 +163,15 @@ if __name__ == '__main__':
 	conf = parse_yaml("conf.yaml")
 	
 	# load ASR model
+	app.logger.info("===== Loading ASR Model =====")
 	asr_conf = conf["asr"]
 	asr_model = ASR(asr_conf)
 	
 	# load TTS model
+	app.logger.info("===== Loading TTS Model =====")
 	tts_conf = conf["tts"]
 	tts_model = TTS(tts_conf)
 
 	# run server
+	app.logger.info("===== Running the Server =====")
 	app.run(host="0.0.0.0", port=5000)

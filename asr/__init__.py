@@ -1,5 +1,6 @@
 import os
 import torch
+import logging
 import librosa
 import numpy as np
 
@@ -12,6 +13,7 @@ class ASR():
         self.conf = conf
         # load pre-trained model
         model_path = os.path.join(os.getcwd(), self.conf["model_path"])
+        logging.info('loading model file from ' + model_path)
         self.model = DeepSpeech.load_model(model_path)
         self.model.eval()
         self.device = torch.device("cuda" if conf["cuda"] else "cpu")
@@ -20,9 +22,11 @@ class ASR():
             self.model = self.model.half()
 
         # create decoder
+        logging.info('using a '+conf["decoder"]+' CTC decoder')
         if conf["decoder"] == "beam":
             from .decoder import BeamCTCDecoder
             lm_path = os.path.join(os.getcwd(), self.conf["lm_path"])
+            logging.info('Loading language model from '+lm_path)
             self.decoder = BeamCTCDecoder(self.model.labels,
                                     lm_path = lm_path,
                                     alpha = self.conf["alpha"],
@@ -78,6 +82,6 @@ class ASR():
                 if self.conf["offsets"]:
                     result['offsets'] = decoded_offsets[b][pi].tolist()
                 output.append(result)
-        # print(output[0]['transcription'])
+        logging.info("ASR output: "+output[0]['transcription'])
         return output[0]['transcription']
 

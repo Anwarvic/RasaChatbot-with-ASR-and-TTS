@@ -106,7 +106,7 @@
 					</form>
 					<div class="input-group-append">
 						{% if asr_enabled %}
-						<button class="input-group-text send_btn send_btn2" ng-disabled="!config.asr" title="{a micTitle a}" ng-mousedown="record()" ng-mouseup="stop()">
+						<button class="input-group-text send_btn send_btn2" ng-disabled="!config.asr" title="{a micTitle a}" ng-mousedown="record()" ng-mouseout = "stop()" ng-mouseup="stop()">
 							<i class="fas fa-microphone-alt"></i>
 						</button>
 						{% endif %}

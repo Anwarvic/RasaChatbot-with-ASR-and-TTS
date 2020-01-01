@@ -308,7 +308,11 @@ function($scope, $http, $timeout) {
 		return snd;
 	};
 
+	// rasa usually responds with more than one message, and these messages
+	// could be either text, image or both. This function handles these 
+	// responses in an asynchronous way (message by message)!!
 	$scope.handleBackendResponses = function(responses, index){
+		// stops when indices ran out
 		if (index == responses.length){
 			return
 		}
@@ -330,7 +334,7 @@ function($scope, $http, $timeout) {
 				snd.onended = function(){
 					console.log("TTS is ended");
 					$scope.handleBackendResponses(responses, index+1);
-				}
+				};
 			}
 			else{
 				$timeout(function(){

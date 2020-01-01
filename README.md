@@ -1,4 +1,4 @@
-# RasaChatbot with ASR and TTS
+# RasaChatbot with ASR and TTS (Mozilla Branch)
 This repository contains an attempt to incorporate Rasa Chatbot with state-of-the-art ASR (Automatic Speech Recognition) and TTS (Text-to-Speech) models directly without the need of running additional servers or socket connections.
 
 
@@ -65,10 +65,18 @@ Here is a table of the least acceptable version of each mainstream browser out t
 </table>
 
 
-# Issues
+# Branches
+
+This project has different versions based on the components. These are the existing branches:
+
+- `master`: where we have DeepSpeech2 ASR, Rasa chatbot, and ESPNet TTS
+- `Rasa2`: dedicated for Rasa's pull request
+- `Nemo`: where we have Nivida's NeMo as chatbot, ASR and TTS
+
+
+# Known Issues
 
 - This interface doesn't work on **Internet Explorer**, and I need to check its status with **Edge**.
-- The TTS interface has a problem whenever Rasa responds with more than one `text` message... It handles multiple responses perfectly as long as they have one `text` message. If Rasa responds with more than one `text` message, all the `text` messages are being played at the same time. 
 
 
 # Acknowledgements

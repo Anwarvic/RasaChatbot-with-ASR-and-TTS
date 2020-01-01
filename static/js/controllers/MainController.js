@@ -298,13 +298,18 @@ function($scope, $http, $timeout) {
 	// play audio returned from TTS
 	$scope.TTSplay = function(snd_obj){
 		let buff = new Float32Array(snd_obj["audio"]);
-		let wav = new synth.WAV(1, snd_obj["sample_rate"], 32, true, buff);
+		// Convert buffer to WAV (sample rate: snd_ob["sample_rate"], percision: 16-bit)
+		let wav = new synth.WAV(1, snd_obj["sample_rate"], 16, true, buff);
 		// convert wav to blob
 		let blob = wav.toBlob();
 		// get url to be saved in the conversation
 		let url = URL.createObjectURL(blob);
 		let snd = new Audio(url);
-		snd.autoplay = true;
+		// don't use autoplay as it's disabled in Firefox
+		// snd.autoplay = true;
+		snd.onplaying = function(){
+			console.log("TTS is playing");
+		};
 		return snd;
 	};
 
@@ -328,6 +333,7 @@ function($scope, $http, $timeout) {
 			};
 			if (element["snd"]){
 				let snd = $scope.TTSplay(element["snd"]);
+				snd.play();
 				console.log("RASA: "); console.log(rasaMsg);
 				// Push the bot response
 				$scope.conversation.push(rasaMsg);

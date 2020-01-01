@@ -14,7 +14,7 @@ function($scope, $http, $timeout) {
 	// control app configulration
 	$scope.config = {
 		asr: false,
-		tts: true
+		tts: false
 	};
 
 	//////////////////// HTML click functions ////////////////////

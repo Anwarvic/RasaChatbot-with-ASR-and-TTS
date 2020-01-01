@@ -31,3 +31,12 @@ tacotron2
 fastspeech
 transformer
 ljspeech.parallel_wavegan.v1
+
+# arabic version
+ar_app.py
+ArController.js
+arindex.html
+ar_conf.yaml
+rasa-ar
+static/img/bot2.png
+asr/models/ar

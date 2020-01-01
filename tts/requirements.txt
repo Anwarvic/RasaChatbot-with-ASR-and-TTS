@@ -1,7 +1,0 @@
-nltk 
-g2p_en
-PyYaml
-chainer
-unidecode
-editdistance
-parallel_wavegan

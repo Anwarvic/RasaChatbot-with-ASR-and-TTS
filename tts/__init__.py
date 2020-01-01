@@ -18,33 +18,34 @@ MODEL_CONF = {
     "tacotron2": {
         "trans_type": "char",
         "dict_path": "tts/models/tacotron2/data/lang_1char/train_no_dev_units.txt",
-        "model_path": "tts/models/tacotron2/exp/train_no_dev_pytorch_train_pytorch_tacotron2.v3/results/model.last1.avg.best",
-        "vocoder_path": "tts/models/ljspeech.parallel_wavegan.v1/checkpoint-400000steps.pkl",
-        "vocoder_conf": "tts/models/ljspeech.parallel_wavegan.v1/config.yml"
+        "model_path": "tts/models/tacotron2/exp/train_no_dev_pytorch_train_pytorch_tacotron2.v3/results/model.last1.avg.best"
     },
   
     "fastspeech": {
         "trans_type": "phn",
         "dict_path": "tts/models/fastspeech/data/lang_1phn/train_no_dev_units.txt",
-        "model_path": "tts/models/fastspeech/exp/phn_train_no_dev_pytorch_train_fastspeech.v4/results/model.last1.avg.best",
-        "vocoder_path": "tts/models/ljspeech.parallel_wavegan.v1/checkpoint-400000steps.pkl",
-        "vocoder_conf": "tts/models/ljspeech.parallel_wavegan.v1/config.yml"
+        "model_path": "tts/models/fastspeech/exp/phn_train_no_dev_pytorch_train_fastspeech.v4/results/model.last1.avg.best"
     },
     
     "transformer": {
         "trans_type": "phn",
         "dict_path": "tts/models/transformer/data/lang_1phn/train_no_dev_units.txt",
-        "model_path": "tts/models/transformer/exp/phn_train_no_dev_pytorch_train_pytorch_transformer.v3/results/model.last1.avg.best",
-        "vocoder_path": "tts/models/ljspeech.parallel_wavegan.v1/checkpoint-400000steps.pkl",
-        "vocoder_conf": "tts/models/ljspeech.parallel_wavegan.v1/config.yml"
+        "model_path": "tts/models/transformer/exp/phn_train_no_dev_pytorch_train_pytorch_transformer.v3/results/model.last1.avg.best"
     }
 }
 
+VOCODER_CONF = {
+    "vocoder_path": "tts/models/ljspeech.parallel_wavegan.v1/checkpoint-400000steps.pkl",
+    "vocoder_conf": "tts/models/ljspeech.parallel_wavegan.v1/config.yml"
+}
 
 
 class TTS():
     def __init__(self, conf):
-        self.device = torch.device(conf["device"])
+        if conf["cuda"]:
+            self.device = torch.device("cuda")
+        else:
+            self.device = torch.device("cpu")
         self.conf = MODEL_CONF[conf["model"]]
 
         # define E2E-TTS model
@@ -54,13 +55,12 @@ class TTS():
         torch_load(self.conf["model_path"], self.model)
         self.model = self.model.eval().to(self.device)
 
-        # define neural vocoder
-        with open(self.conf["vocoder_conf"]) as f:
+        # load neural vocoder
+        with open(VOCODER_CONF["vocoder_conf"]) as f:
             self.vocoder_config = yaml.load(f, Loader=yaml.Loader)
-
         self.vocoder = ParallelWaveGANGenerator(**self.vocoder_config["generator_params"])
         self.vocoder.load_state_dict(\
-            torch.load(self.conf["vocoder_path"], map_location="cpu")["model"]["generator"])
+            torch.load(VOCODER_CONF["vocoder_path"], map_location="cpu")["model"]["generator"])
         self.vocoder.remove_weight_norm()
         self.vocoder = self.vocoder.eval().to(self.device)
 
@@ -69,7 +69,7 @@ class TTS():
             lines = f.readlines()
         lines = [line.replace("\n", "").split(" ") for line in lines]
         self.char_to_id = {c: int(i) for c, i in lines}
-        
+
 
     def __frontend(self, text):
             """Clean text and then convert to id sequence."""

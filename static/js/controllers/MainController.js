@@ -14,7 +14,7 @@ function($scope, $http, $timeout) {
 	// control app configulration
 	$scope.config = {
 		asr: false,
-		tts: false
+		tts: true
 	};
 
 	//////////////////// HTML click functions ////////////////////
@@ -78,28 +78,9 @@ function($scope, $http, $timeout) {
 				// remove loading message
 				document.getElementById("msg#"+botLoadingMsg["id"]).classList.remove("loading");
 				$scope.conversation.pop();
-				// iterate over Rasa's messages
-				response['data'].forEach(async function(element) {
-					// formulate bot response
-					let rasaMsg = {
-						"id": $scope.conversation.length,
-						"sender": "bot",
-						"time": $scope.getTime(),
-						"type": element["type"],
-						"body": element["body"]
-					};
-					if (element["snd"]){
-						// wait for TTS
-						let promise = $scope.TTSplay(element["snd"]);
-						promise.then(function(snd){
-							snd.play();
-						});
-					}
-					console.log("RASA: "); console.log(rasaMsg);
-					// Push the bot response
-					$scope.conversation.push(rasaMsg);
-					resolve ("Rasa Response presented!!");
-				});
+				// handle backend responses
+				$scope.handleBackendResponses(response["data"], 0);
+				resolve("Rasa Response Submitted!!")
 			},
 			function(response) { 
 				// failed
@@ -315,7 +296,7 @@ function($scope, $http, $timeout) {
 	};
 
 	// play audio returned from TTS
-	$scope.TTSplay = async function(snd_obj){
+	$scope.TTSplay = function(snd_obj){
 		let buff = new Float32Array(snd_obj["audio"]);
 		let wav = new synth.WAV(1, snd_obj["sample_rate"], 32, true, buff);
 		// convert wav to blob
@@ -323,17 +304,45 @@ function($scope, $http, $timeout) {
 		// get url to be saved in the conversation
 		let url = URL.createObjectURL(blob);
 		let snd = new Audio(url);
-		// fires when TTS audio is playing
-		snd.onplaying = function(){
-			console.log("TTS Playing!");
-		};
-		// fires when TTS audio ends
-		snd.onended = function(){
-			console.log("TTS Ended!");
-		};
+		snd.autoplay = true;
 		return snd;
 	};
 
+	$scope.handleBackendResponses = function(responses, index){
+		if (index == responses.length){
+			return
+		}
+		else{
+			let element = responses[index];
+			// formulate bot response
+			let rasaMsg = {
+				"id": $scope.conversation.length,
+				"sender": "bot",
+				"time": $scope.getTime(),
+				"type": element["type"],
+				"body": element["body"]
+			};
+			if (element["snd"]){
+				let snd = $scope.TTSplay(element["snd"]);
+				console.log("RASA: "); console.log(rasaMsg);
+				// Push the bot response
+				$scope.conversation.push(rasaMsg);
+				snd.onended = function(){
+					console.log("TTS is ended");
+					$scope.handleBackendResponses(responses, index+1);
+				}
+			}
+			else{
+				$timeout(function(){
+					console.log("RASA: "); console.log(rasaMsg);
+					// Push the bot response
+					$scope.conversation.push(rasaMsg);
+					$scope.handleBackendResponses(responses, index+1);
+				}, 0);
+			}
+		}
+	}
+	
 }]);
 
 // responsible for scrolling down the page whenever a new message is posted
